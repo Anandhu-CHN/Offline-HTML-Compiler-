@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Offline Compiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        #help-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+        #help-div {
+            display: none;
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            width: 300px;
+            z-index: 10;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        #input {
+            margin-bottom: 10px;
+            position: relative;
+            display: flex;
+        }
+        #line-numbers {
+            padding: 10px;
+            background-color: #222;
+            color: white;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #ccc;
+            height: 450px;
+        }
+        #txt {
+            background-color: #332013;
+            color: white;
+            width: 100%;
+            height: 450px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+            resize: none;
+            font-family: monospace;
+            overflow-y: auto;
+        }
+        #output {
+            width: 100%;
+            height: 500px;
+            background-color: #ebf5f3;
+            border: 1px solid #ccc;
+            overflow: hidden;
+        }
+        .suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            z-index: 1000;
+            width: calc(100% - 20px);
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .suggestions div {
+            padding: 5px;
+            cursor: pointer;
+        }
+        .suggestions div:hover {
+            background-color: #f0f0f0;
+        }
+        .tag {
+            color: #39fc03;
+        }
+        .id {
+            color: #03e8fc;
+        }
+        #download{
+            background-color:#fc0384;
+        }
+        #run{
+            background-color: red;
+        }
+        #file-input{
+            background-color:#03fca5 ;
+        }
+        h1{
+            color: blue;
+            font-family: Liberation-Sans;
+        }
+        #dynamicColorPicker {
+            display: none;
+            position: absolute;
+            z-index: 1001;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+    <button id="help-button" onclick="toggleHelp()">Help</button>
+    <div id="help-div">
+        <h3>Help Guide</h3>
+        <p>Welcome to the HTML Offline Compiler!</p>
+        <p>Here are some features you can use:</p>
+        <ul>
+            <li><strong>Tag Suggestions:</strong> Start typing a tag (e.g., <code>&lt;div&gt;</code>) to receive suggestions.</li>
+            <li><strong>Auto Closing Tags:</strong> When you type a tag and finish with <code>&gt;</code>, the corresponding closing tag will be generated automatically.</li>
+            <li><strong>HTML Structure:</strong> Type <code>#!</code> and hit <code>Enter</code> to insert a basic HTML document structure.</li>
+            <li><strong>File Upload:</strong> Upload an existing HTML file to edit using the file input feature.</li>
+            <li><strong>Run:</strong> Click the "Run" button to see the live preview of your HTML code.</li>
+            <li><strong>Download:</strong> Click the "Download" button to save your HTML code as a file.</li>
+        </ul>
+        <button onclick="toggleHelp()">Close</button>
+    </div>
+    <br /> <br/>
+    <center><h1>Offline HTML Compiler</h1> </center>
+    <br />
+    <br />
+    <br />
+    <div id="input">
+        <div id="line-numbers"></div>
+        <textarea id="txt" oninput="updateLineNumbers(); showSuggestions(event)" onkeydown="handleKeyDown(event)" autocomplete="off"></textarea>
+        <div id="suggestions" class="suggestions"></div>
+        <input type="color" id="dynamicColorPicker">
+    </div>
+    <input type="file" id="file-input" accept=".html" onchange="loadFile(event)" />
+    <input type="button" id="run" value="Run" onclick="run()" />
+    <input type="button" id="download" value="Download" onclick="download()" />
+    <div id="output">
+        <iframe id="iframe-output" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+    <script>
+        const tagPairs = {
+            'html': '/html',
+            'head': '/head',
+            'title': '/title',
+            'body': '/body',
+            'div': '/div',
+            'span': '/span',
+            'p': '/p',
+            'h1': '/h1',
+            'h2': '/h2',
+            'h3': '/h3',
+            'h4': '/h4',
+            'h5': '/h5',
+            'h6': '/h6',
+            'a': '/a',
+            'img': null,
+            'ul': '/ul',
+            'ol': '/ol',
+            'li': '/li',
+            'table': '/table',
+            'tr': '/tr',
+            'td': '/td',
+            'th': '/th',
+            'form': '/form',
+            'input': null,
+            'button': '/button',
+            'textarea': '/textarea',
+            'select': '/select',
+            'option': '/option',
+            'script': '/script'
+        };
+
+        function toggleHelp() {
+            const helpDiv = document.getElementById("help-div");
+            if (helpDiv.style.display === "none" || helpDiv.style.display === "") {
+                helpDiv.style.display = "block";
+            } else {
+                helpDiv.style.display = "none";
+            }
+        }
+
+        function updateLineNumbers() {
+            const txtArea = document.getElementById('txt');
+            const lineNumbersDiv = document.getElementById('line-numbers');
+            const lines = txtArea.value.split('\n').length;
+            lineNumbersDiv.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br/>');
+        }
+
+        function showSuggestions(event) {
+            const input = event.target.value;
+            const lastTag = input.match(/<([a-zA-Z]*)$/);
+            const suggestionsDiv = document.getElementById('suggestions');
+            suggestionsDiv.innerHTML = '';
+            suggestionsDiv.style.display = 'none';
+            if (lastTag) {
+                const tagName = lastTag[1].toLowerCase();
+                const filteredSuggestions = Object.keys(tagPairs).filter(tag => tag.startsWith(tagName));
+                if (filteredSuggestions.length > 0) {
+                    filteredSuggestions.forEach(tag => {
+                        const div = document.createElement('div');
+                        div.textContent = `<${tag}>`;
+                        div.onclick = () => selectSuggestion(tag, lastTag[0]);
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                }
+            }
+        }
+
+        function selectSuggestion(tag, lastTag) {
+            const txtArea = document.getElementById('txt');
+            const input = txtArea.value;
+            const newValue = input.slice(0, input.length - lastTag.length) + `<${tag}>` + input.slice(input.length);
+            txtArea.value = newValue;
+            updateLineNumbers();
+            document.getElementById('suggestions').style.display = 'none';
+            txtArea.focus();
+        }
+
+        function generateClosingTag() {
+            const textarea = document.getElementById('txt');
+            const input = textarea.value.trim();
+            const tagMatch = input.match(/<(\w+)>$/);
+            if (tagMatch) {
+                const tagName = tagMatch[1];
+                const closingTag = `</${tagName}>`;
+                textarea.value = input + closingTag + '\n';
+            }
+        }
+
+        document.getElementById('txt').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                generateClosingTag();
+                event.preventDefault();
+            }
+        });
+
+        function handleKeyDown(event) {
+            const txtArea = document.getElementById('txt');
+            const input = txtArea.value;
+            const dynamicColorPicker = document.getElementById('dynamicColorPicker');
+            let clrPosition = {start:0, end:0};
+
+            if (input.endsWith('#!') && event.key === 'Enter') {
+                event.preventDefault();
+                const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Title Here</title>
+</head>
+<body>
+
+</body>
+</html>`;
+                txtArea.value = input.slice(0, input.length - 2) + htmlTemplate;
+                txtArea.focus();
+                updateLineNumbers();
+            } else if (input.includes('#clr') && event.key === 'Enter') {
+
+                const index = input.lastIndexOf('#clr');
+                if(index >=0){
+                    event.preventDefault();
+                    clrPosition.start = index;
+                    clrPosition.end = index + 4;
+                    dynamicColorPicker.style.display = 'block';
+                    txtArea.style.width = 'calc(100% - 50px)';
+                    dynamicColorPicker.addEventListener('input', function(event) {
+                        const color = event.target.value;
+                        txtArea.value = txtArea.value.substring(0, clrPosition.start) + color + txtArea.value.substring(clrPosition.end);
+                        dynamicColorPicker.style.display = 'none';
+                        txtArea.style.width = '100%';
+                        updateLineNumbers();
+                        dynamicColorPicker.removeEventListener('input', arguments.callee);
+                    });
+                }
+
+            } else if (event.key === 'Enter') {
+                const start = txtArea.selectionStart;
+                const end = txtArea.selectionEnd;
+                txtArea.value = txtArea.value.substring(0, start) + '\n' + txtArea.value.substring(end);
+                txtArea.selectionStart = txtArea.selectionEnd = start + 1;
+                event.preventDefault();
+            }
+            updateLineNumbers();
+        }
+
+        function run() {
+            const inputText = document.getElementById("txt").value;
+            const iframe = document.getElementById("iframe-output");
+            const content = `
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Preview</title>
+                </head>
+                <body>
+                    ${inputText}
+                </body>
+                </html>
+            `;
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            doc.open();
+            doc.write(content);
+            doc.close();
+        }
+
+        function download() {
+            const inputText = document.getElementById("txt").value;
+            const blob = new Blob([inputText], { type: "text/html" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "download.html";
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("txt").value = e.target.result;
+                    updateLineNumbers();
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        document.addEventListener('click', function(event) {
+            const suggestionsDiv = document.getElementById('suggestions');
+            if (!document.getElementById('input').contains(event.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+
+        updateLineNumbers();
+    </script>
+</body>
+</html>
