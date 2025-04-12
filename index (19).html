@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Offline Compiler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        #help-button {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 8px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #help-div {
+            display: none;
+            position: fixed;
+            top: 50px;
+            left: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            z-index: 10;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        #input {
+            margin-bottom: 10px;
+            position: relative;
+            display: flex;
+            flex-grow: 1;
+        }
+
+        #line-numbers {
+            padding: 8px;
+            background-color: #222;
+            color: white;
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+            font-size: 14px;
+        }
+
+        #txt {
+            background-color: #332013;
+            color: white;
+            width: 100%;
+            border: 1px solid #ccc;
+            padding: 8px;
+            box-sizing: border-box;
+            resize: vertical;
+            font-family: monospace;
+            overflow-y: auto;
+            font-size: 14px;
+            min-height: 200px;
+        }
+
+        #output {
+            width: 100%;
+            background-color: #ebf5f3;
+            border: 1px solid #ccc;
+            overflow: hidden;
+            flex-grow: 1;
+            min-height: 200px;
+        }
+
+        .suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            z-index: 1000;
+            width: calc(100% - 16px);
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .suggestions div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        .suggestions div:hover {
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            color: blue;
+            font-family: Liberation-Sans;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        #image-upload-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        #image-upload,
+        #download-compiler,
+        #file-input {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        #download-compiler {
+            background-color: #008CBA;
+        }
+
+        #file-input {
+            background-color: #03fca5;
+        }
+
+        #image-upload-input {
+            display: none;
+        }
+
+        #uploaded-image-preview {
+            max-width: 80px;
+            max-height: 80px;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            display: none;
+            border-radius: 5px;
+        }
+
+        #run,
+        #download {
+            background-color: red;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        #download {
+            background-color: #fc0384;
+        }
+
+        #image-shortcuts-tab {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #337ab7;
+            color: white;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 20;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        #image-shortcuts-panel {
+            display: none;
+            position: fixed;
+            top: 50px;
+            right: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 10px;
+            z-index: 20;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-height: 70vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+
+        .image-code-item {
+            padding: 8px;
+            cursor: pointer;
+            border: 1px solid #eee;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .image-code-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .full-image-preview {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 95vw;
+            max-height: 95vh;
+            object-fit: contain;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 31;
+            display: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #output iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        @media (max-width: 600px) {
+            #help-button {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            h1 {
+                font-size: 20px;
+                margin-bottom: 15px;
+            }
+
+            #image-upload-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #image-upload,
+            #download-compiler,
+            #file-input,
+            #run,
+            #download {
+                font-size: 16px;
+                padding: 10px;
+                margin-right: 0;
+                margin-bottom: 5px;
+            }
+
+            #image-shortcuts-tab {
+                font-size: 12px;
+                padding: 6px 10px;
+                top: auto;
+                bottom: 10px;
+                left: auto;
+                right: 10px;
+            }
+
+            #image-shortcuts-panel {
+                top: auto;
+                bottom: 50px;
+                max-height: 60vh;
+                max-width: 95%;
+            }
+
+            #input,
+            #output {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="help-button">Help</button>
+    <div id="help-div">
+        <h3>Help Guide</h3>
+        <p>Welcome to the HTML Offline Compiler!</p>
+        <p>Here are some features you can use:</p>
+        <ul>
+            <li><strong>Tag Suggestions:</strong> Start typing a tag (e.g., <code>&lt;div&gt;</code>) to receive suggestions.</li>
+            <li><strong>Auto Closing Tags:</strong> When you type a tag and finish with <code>&gt;</code>, the corresponding closing tag will be generated automatically.</li>
+            <li><strong>HTML Structure:</strong> Type <code>#!</code> and hit <code>Enter</code> to insert a basic HTML document structure.</li>
+            <li><strong>File Upload:</strong> Upload an existing HTML file to edit using the file input feature.</li>
+            <li><strong>Run:</strong> Click the "Run" button to see the live preview of your HTML code.</li>
+            <li><strong>Download:</strong> Click the "Download" button to save your HTML code as a file.</li>
+            <li><strong>Image Upload:</strong> Click "Upload Image" to select an image and refer to it using a short code (e.g., <code>[image1]</code>).</li>
+            <li><strong>Image Shortcuts:</strong> Click the "Images" tab to see uploaded image shortcuts. Click a shortcut to view the image, and click again to hide it.</li>
+            <li><strong>Download Compiler:</strong> Click "Download Compiler" to save this entire compiler as an HTML file to run offline.</li>
+        </ul>
+        <button onclick="toggleHelp()">Close</button>
+    </div>
+    <br /> <br/>
+    <center><h1>Offline HTML Compiler</h1> </center>
+    <br />
+    <br />
+    <br />
+    <div id="image-upload-container">
+        <button id="image-upload">Upload Image</button>
+        <input type="file" id="image-upload-input" accept="image/*" />
+        <img id="uploaded-image-preview" src="#" alt="Uploaded Image Preview" style="display:none;">
+        <button id="download-compiler">Download Compiler</button>
+    </div>
+    <div id="input">
+        <div id="line-numbers"></div>
+        <textarea id="txt" autocomplete="off"></textarea>
+        <div id="suggestions" class="suggestions"></div>
+    </div>
+    <input type="file" id="file-input" accept=".html" />
+    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <button id="run">Run</button>
+        <button id="download">Download</button>
+    </div>
+
+    <div id="image-shortcuts-tab">Images</div>
+    <div id="image-shortcuts-panel">
+        </div>
+    <div id="full-image-preview" class="full-image-preview"></div>
+
+    <div id="output">
+        <iframe id="iframe-output" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tagPairs = {
+                'html': '/html',
+                'head': '/head',
+                'title': '/title',
+                'body': '/body',
+                'div': '/div',
+                'span': '/span',
+                'p': '/p',
+                'h1': '/h1',
+                'h2': '/h2',
+                'h3': '/h3',
+                'h4': '/h4',
+                'h5': '/h5',
+                'h6': '/h6',
+                'a': '/a',
+                'img': null,
+                'ul': '/ul',
+                'ol': '/ol',
+                'li': '/li',
+                'table': '/table',
+                'tr': '/tr',
+                'td': '/td',
+                'th': '/th',
+                'form': '/form',
+                'input': null,
+                'button': '/button',
+                'textarea': '/textarea',
+                'select': '/select',
+                'option': '/option',
+                'script': '/script'
+            };
+
+            let uploadedImageDataURLs = [];
+            let imageCount = 0;
+            const imagePanel = document.getElementById('image-shortcuts-panel');
+            const fullImagePreviewDiv = document.getElementById('full-image-preview');
+            let visibleFullImageURL = null;
+            const txtArea = document.getElementById('txt');
+            const lineNumbersDiv = document.getElementById('line-numbers');
+            const suggestionsDiv = document.getElementById('suggestions');
+            const helpDiv = document.getElementById("help-div");
+            const iframeOutput = document.getElementById("iframe-output");
+            const uploadedImagePreview = document.getElementById('uploaded-image-preview');
+            const imageUploadInput = document.getElementById('image-upload-input');
+            const fileInput = document.getElementById('file-input');
+            const downloadButton = document.getElementById('download');
+            const runButton = document.getElementById('run');
+            const downloadCompilerButton = document.getElementById('download-compiler');
+            const helpButtonElement = document.getElementById('help-button');
+            const imageShortcutsTabElement = document.getElementById('image-shortcuts-tab');
+            const imageUploadButtonElement = document.getElementById('image-upload');
+            const closeHelpButton = helpDiv.querySelector('button');
+
+            function toggleHelp() {
+                helpDiv.style.display = helpDiv.style.display === "none" ? "block" : "none";
+            }
+
+            function updateLineNumbers() {
+                const lines = txtArea.value.split('\n').length;
+                lineNumbersDiv.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br/>');
+            }
+
+            function showSuggestions(event) {
+                const input = event.target.value;
+                const lastTag = input.match(/<([a-zA-Z]*)$/);
+                suggestionsDiv.innerHTML = '';
+                suggestionsDiv.style.display = 'none';
+                if (lastTag) {
+                    const tagName = lastTag[1].toLowerCase();
+                    const filteredSuggestions = Object.keys(tagPairs).filter(tag => tag.startsWith(tagName));
+                    if (filteredSuggestions.length > 0) {
+                        filteredSuggestions.forEach(tag => {
+                            const div = document.createElement('div');
+                            div.textContent = `<${tag}>`;
+                            div.onclick = () => selectSuggestion(tag, lastTag[0]);
+                            suggestionsDiv.appendChild(div);
+                        });
+                        suggestionsDiv.style.display = 'block';
+                    }
+                }
+            }
+
+            function selectSuggestion(tag, lastTag) {
+                const input = txtArea.value;
+                const newValue = input.slice(0, input.length - lastTag.length) + `<${tag}>` + input.slice(input.length);
+                txtArea.value = newValue;
+                updateLineNumbers();
+                suggestionsDiv.style.display = 'none';
+                txtArea.focus();
+            }
+
+            function generateClosingTag() {
+                const input = txtArea.value.trim();
+                const tagMatch = input.match(/<(\w+)>$/);
+                if (tagMatch) {
+                    const tagName = tagMatch[1];
+                    const closingTag = `</${tagName}>`;
+                    txtArea.value = input + closingTag + '\n';
+                }
+            }
+
+            function handleKeyDown(event) {
+                if (event.key === 'Enter') {
+                    generateClosingTag();
+                    event.preventDefault();
+                } else if (txtArea.value.endsWith('#!') && event.key === 'Enter') {
+                    event.preventDefault();
+                    const htmlTemplate = `<!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Your Title Here</title>
+                        </head>
+                        <body>
+
+                        </body>
+                        </html>`;
+                    txtArea.value = txtArea.value.slice(0, txtArea.value.length - 2) + htmlTemplate;
+                    txtArea.focus();
+                    updateLineNumbers();
+                } else if (event.key === 'Enter') {
+                    const start = txtArea.selectionStart;
+                    const end = txtArea.selectionEnd;
+                    txtArea.value
+                        = txtArea.value.substring(0, start) + '\n' + txtArea.value.substring(end);
+                    txtArea.selectionStart = txtArea.selectionEnd = start + 1;
+                    event.preventDefault();
+                }
+                updateLineNumbers();
+            }
+
+            function run() {
+                const inputText = txtArea.value;
+                let processedHTML = inputText;
+                for (let i = 0; i < uploadedImageDataURLs.length; i++) {
+                    const code = `[image${i + 1}]`;
+                    const dataURL = uploadedImageDataURLs[i];
+                    processedHTML = processedHTML.replaceAll(code, `<img src="${dataURL}" style="max-width: 100%;">`);
+                }
+                iframeOutput.srcdoc = processedHTML;
+            }
+
+            function download() {
+                const text = txtArea.value;
+                const filename = "index.html";
+                const element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+            }
+
+            function loadFile(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        txtArea.value = e.target.result;
+                        updateLineNumbers();
+                    }
+                    reader.readAsText(file);
+                }
+            }
+
+            function uploadImage(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    const dataURL = reader.result;
+                    uploadedImageDataURLs.push(dataURL);
+                    imageCount++;
+                    uploadedImagePreview.src = dataURL;
+                    uploadedImagePreview.style.display = 'block';
+                    updateImagePanel();
+                }
+                if (file) {
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            function toggleImagePanel() {
+                imagePanel.style.display = imagePanel.style.display === 'none' ? 'block' : 'none';
+                updateImagePanel();
+            }
+
+            function updateImagePanel() {
+                imagePanel.innerHTML = '';
+                uploadedImageDataURLs.forEach((dataURL, index) => {
+                    const imageCode = `[image${index + 1}]`;
+                    const codeItem = document.createElement('div');
+                    codeItem.classList.add('image-code-item');
+                    codeItem.textContent = imageCode;
+                    codeItem.onclick = () => showFullImage(dataURL);
+                    imagePanel.appendChild(codeItem);
+                });
+            }
+
+            function showFullImage(dataURL) {
+                fullImagePreviewDiv.innerHTML = `<img src="${dataURL}" style="max-width: 90vw; max-height: 90vh; object-fit: contain;">`;
+                fullImagePreviewDiv.style.display = 'block';
+                visibleFullImageURL = dataURL;
+            }
+
+            function downloadCompiler() {
+                const htmlContent = document.documentElement.outerHTML;
+                const filename = "offline_html_compiler.html";
+                const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+
+            if (helpButtonElement) helpButtonElement.onclick = toggleHelp;
+            if (closeHelpButton) closeHelpButton.onclick = toggleHelp;
+            if (txtArea) {
+                txtArea.oninput = updateLineNumbers;
+                txtArea.addEventListener('input', showSuggestions);
+                txtArea.addEventListener('keydown', handleKeyDown);
+            }
+            if (runButton) runButton.onclick = run;
+            if (downloadButton) downloadButton.onclick = download;
+            if (fileInput) fileInput.onchange = loadFile;
+            if (imageUploadInput) imageUploadInput.onchange = uploadImage;
+            if (imageShortcutsTabElement) imageShortcutsTabElement.onclick = toggleImagePanel;
+            if (fullImagePreviewDiv) fullImagePreviewDiv.onclick = function() { this.style.display='none'; visibleFullImageURL = null; };
+            if (downloadCompilerButton) downloadCompilerButton.onclick = downloadCompiler;
+            if (imageUploadButtonElement) imageUploadButtonElement.onclick = function() { document.getElementById('image-upload-input').click(); };
+
+            updateLineNumbers();
+        });
+    </script>
+</body>
+</html>
