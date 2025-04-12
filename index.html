@@ -190,6 +190,11 @@
         <button id="set-background" onclick="setBackground()">Set Background</button>
     </div>
     <div id="input">
+       < br/>
+        <a href="Offline_HTML_Compiler.html" download="Offline Html Compiler.html">Download Offline Html Compiler</a>
+
+<button onclick="triggerDownload()">Download Html Compiler</button>
+        
         <div id="line-numbers"></div>
         <textarea id="txt" oninput="updateLineNumbers(); showSuggestions(event)" onkeydown="handleKeyDown(event)" autocomplete="off"></textarea>
         <div id="suggestions" class="suggestions"></div>
@@ -430,6 +435,20 @@
         });
 
         updateLineNumbers();
+
+
+  function triggerDownload() {
+    const link = document.createElement('a');
+    link.href = 'Offline_HTML_Compiler.html'; // Path to your existing HTML file
+    link.download = 'Offline Html Compiler.html
+'; // Optional suggested filename
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+   
+
+        
     </script>
 </body>
 </html>
