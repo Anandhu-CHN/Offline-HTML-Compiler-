@@ -157,6 +157,12 @@
             margin-left: 10px;
             display: none;
         }
+        #downloadcmp{
+            background-color:#c4169c;
+        }
+        marquee{
+            color:#9603ff;
+        }
     </style>
 </head>
 <body>
@@ -175,7 +181,7 @@
             <li><strong>Image Upload:</strong> Click "Upload Image" to select an image from your computer and embed it using a data URL.</li>
             <li><strong>Background Image:</strong> Enter a URL in the "Background Image URL" field and click "Set Background" to apply it to the <code>body</code>.</li>
         </ul>
-        <button onclick="toggleHelp()">Close</button>
+        <button id="downloadcmp"onclick="toggleHelp()">Close</button>
     </div>
     <br /> <br/>
     <center><h1>Offline HTML Compiler</h1> </center>
@@ -190,9 +196,9 @@
         <button id="set-background" onclick="setBackground()">Set Background</button>
     </div>
     
-       
+      <br> 
       <button onclick="triggerDownload()"><a href="Offline_HTML_Compiler.html" download="Offline Html Compiler.html">Download Html Compiler</a></button>
-
+<br>
 
         
         <div id="line-numbers"></div>
@@ -203,6 +209,9 @@
     <input type="file" id="file-input" accept=".html" onchange="loadFile(event)" />
     <input type="button" id="run" value="Run" onclick="run()" />
     <input type="button" id="download" value="Download" onclick="download()" />
+   <br>
+    <marquee> Once you have downloaded the offline version just reload it for proper functioning.</marquee>
+    
     <div id="output">
         <iframe id="iframe-output" style="width: 100%; height: 100%; border: none;"></iframe>
     </div>
