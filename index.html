@@ -1,49 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+ <html lang="en"><head>
     <meta charset="UTF-8">
-    
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Free Offline HTML Editor & Compiler | Code, Preview Instantly</title>
-<meta name="description" content="Edit and compile HTML code offline in your browser. Instant live preview, tag suggestions, image support, and download your projects. No internet needed!">
-<meta name="keywords" content="html editor, offline html editor, html compiler, online html editor offline, code editor offline, html preview, test html offline, free html editor, web development tools">
-<meta name="author" content="Free Offline HTML Editor">
-<meta name="robots" content="index, follow">
-<meta name="googlebot" content="index, follow">
-<meta name="language" content="en-US">
-<meta http-equiv="content-language" content="en-US">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HTML Offline Compiler</title>
-    <style>a
+    <style>
         body {
-            font-family: Arial, asans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-        }
-        #help-button {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            z-index: 10;
-        }
-        #help-div {
-            display: none;
-            position: absolute;
-            top: 50px;
-            left: 10px;
-            background-color: #f9f9f9;
-            border: 1px solid #ccc;
-            padding: 15px;
-            width: 300px;
-            z-index: 10;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
         }
         #input {
             margin-bottom: 10px;
@@ -114,12 +79,6 @@
             color: blue;
             font-family: Liberation-Sans;
         }
-        #dynamicColorPicker {
-            display: none;
-            position: absolute;
-            z-index: 1001;
-            right: 0;
-        }
         #image-upload-container {
             display: flex;
             gap: 10px;
@@ -137,19 +96,6 @@
         #image-upload-input {
             display: none;
         }
-        #background-image-url {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        #set-background {
-            background-color: #6c757d;
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
         #uploaded-image-preview {
             max-width: 100px;
             max-height: 100px;
@@ -157,16 +103,51 @@
             margin-left: 10px;
             display: none;
         }
-        #downloadcmp{
-            background-color:#c4169c;
+        #download-compiler {
+            background-color: #008CBA;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-left: 10px;
         }
-        marquee{
-            color:#9603ff;
-        }
+        #download-compiler:hover {
+            background-color: #005f73;
+        }  #selectedColor {
+    margin-top: 10px;
+    width: 50px;
+    height: 50px;
+    border: 1px solid #000;
+  }
+  #colorCode {
+    margin-top: 10px;
+    font-family: monospace;
+  }
+#colorInput{
+border-radius="35px";
+}
+
+#help-button{
+background-color:#75ff12;
+border-radius:20px;
+width:26%;
+height:10%;
+}
+
+#help-div{
+background-color:#f7a8a8;
+display: none;
+}
     </style>
 </head>
 <body>
-    <button id="help-button" onclick="toggleHelp()">Help</button>
+    <br>
+<button id="help-button" onclick="toggleHelp()">Help</button>
+     <br>
+    <center><h1>Offline HTML Compiler</h1> </center>
+    <br>
+    <br>
     <div id="help-div">
         <h3>Help Guide</h3>
         <p>Welcome to the HTML Offline Compiler!</p>
@@ -178,44 +159,41 @@
             <li><strong>File Upload:</strong> Upload an existing HTML file to edit using the file input feature.</li>
             <li><strong>Run:</strong> Click the "Run" button to see the live preview of your HTML code.</li>
             <li><strong>Download:</strong> Click the "Download" button to save your HTML code as a file.</li>
-            <li><strong>Image Upload:</strong> Click "Upload Image" to select an image from your computer and embed it using a data URL.</li>
-            <li><strong>Background Image:</strong> Enter a URL in the "Background Image URL" field and click "Set Background" to apply it to the <code>body</code>.</li>
+            <li><strong>Image Upload:</strong> Click "Upload Image" to select an image and refer to it using a short code (e.g., <code>[image1]</code>).</li>
+            <li><strong>Image Shortcuts:</strong> Click the "Images" tab to see uploaded image shortcuts. Click a shortcut to view the image, and click again to hide it.</li>
+
+<li><strong>Image Shortcuts:</strong> You can use the colours picker provided to add background color etc. The chosen colour code will be generated at the last cursor point.</li>
+            <li><strong>Download Compiler:</strong> Click "Download Compiler" to save this entire compiler as an HTML file to run offline.</li>
         </ul>
-        <button id="downloadcmp"onclick="toggleHelp()">Close</button>
+        <button onclick="toggleHelp()">Close</button>
     </div>
-    <br /> <br/>
-    <center><h1>Offline HTML Compiler</h1> </center>
-    <br />
-    <br />
-    <br />
+
+    <br>
+  <input type="color" id="colorInput" value="#ff0000">
+  <div id="selectedColor" style="background-color: rgb(255, 0, 0);"></div>
+  <div id="colorCode">#ff0000</div><br><br>
+
     <div id="image-upload-container">
         <button id="image-upload" onclick="document.getElementById('image-upload-input').click()">Upload Image</button>
-        <input type="file" id="image-upload-input" accept="image/*" onchange="uploadImage(event)" />
-        <img id="uploaded-image-preview" src="#" alt="Uploaded Image Preview">
-        <input type="text" id="background-image-url" placeholder="Background Image URL">
-        <button id="set-background" onclick="setBackground()">Set Background</button>
+        <input type="file" id="image-upload-input" accept="image/*" onchange="uploadImage(event)">
+        <img id="uploaded-image-preview" src="#" alt="Uploaded Image Preview" style="display:none;">
+        <button id="download-compiler" onclick="downloadCompiler()">Download Compiler</button>
     </div>
-    
-      <br> 
-      <button id="downloadcmp" onclick="triggerDownload()"><a href="Offline_HTML_Compiler.html" download="Offline Html Compiler.html">Download Html Compiler</a></button>
-<br>
-<br>
-        
-        <div id="line-numbers"></div>
+    <div id="input">
+        <div id="line-numbers">1</div>
         <textarea id="txt" oninput="updateLineNumbers(); showSuggestions(event)" onkeydown="handleKeyDown(event)" autocomplete="off"></textarea>
         <div id="suggestions" class="suggestions"></div>
-        <input type="color" id="dynamicColorPicker">
     </div>
-    <input type="file" id="file-input" accept=".html" onchange="loadFile(event)" />
-    <input type="button" id="run" value="Run" onclick="run()" />
-    <input type="button" id="download" value="Download" onclick="download()" />
-   <br>
-    <marquee> Once you have downloaded the offline version just reload it for proper functioning.</marquee>
-    
+   <br /> <input type="file" id="file-input" accept=".html" onchange="loadFile(event)">
+    <br /><input type="button" id="run" value="Run" onclick="run()">
+   <br /> <input type="button" id="download" value="Download" onclick="download()">
+
     <div id="output">
         <iframe id="iframe-output" style="width: 100%; height: 100%; border: none;"></iframe>
     </div>
-    <script>
+
+
+<script>
         const tagPairs = {
             'html': '/html',
             'head': '/head',
@@ -248,16 +226,8 @@
             'script': '/script'
         };
 
-        let uploadedImageBase64 = '';
-
-        function toggleHelp() {
-            const helpDiv = document.getElementById("help-div");
-            if (helpDiv.style.display === "none" || helpDiv.style.display === "") {
-                helpDiv.style.display = "block";
-            } else {
-                helpDiv.style.display = "none";
-            }
-        }
+        let uploadedImageDataURLs = [];
+        let imageCount = 0;
 
         function updateLineNumbers() {
             const txtArea = document.getElementById('txt');
@@ -318,44 +288,31 @@
         function handleKeyDown(event) {
             const txtArea = document.getElementById('txt');
             const input = txtArea.value;
-            const dynamicColorPicker = document.getElementById('dynamicColorPicker');
-            let clrPosition = {start:0, end:0};
 
             if (input.endsWith('#!') && event.key === 'Enter') {
                 event.preventDefault();
                 const htmlTemplate = `<!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Title Here</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+    Your Title Here
+</title> 
+
 </head>
+
 <body>
 
+
 </body>
+     
 </html>`;
-                txtArea.value = input.slice(0, input.length - 2) + htmlTemplate;
+                
+txtArea.value = input.slice(0, input.length - 2) + htmlTemplate;
                 txtArea.focus();
                 updateLineNumbers();
-            } else if (input.includes('#clr') && event.key === 'Enter') {
-
-                const index = input.lastIndexOf('#clr');
-                if(index >=0){
-                    event.preventDefault();
-                    clrPosition.start = index;
-                    clrPosition.end = index + 4;
-                    dynamicColorPicker.style.display = 'block';
-                    txtArea.style.width = 'calc(100% - 50px)';
-                    dynamicColorPicker.addEventListener('input', function(event) {
-                        const color = event.target.value;
-                        txtArea.value = txtArea.value.substring(0, clrPosition.start) + color + txtArea.value.substring(clrPosition.end);
-                        dynamicColorPicker.style.display = 'none';
-                        txtArea.style.width = '100%';
-                        updateLineNumbers();
-                        dynamicColorPicker.removeEventListener('input', arguments.callee);
-                    });
-                }
-
             } else if (event.key === 'Enter') {
                 const start = txtArea.selectionStart;
                 const end = txtArea.selectionEnd;
@@ -369,38 +326,31 @@
         function run() {
             const inputText = document.getElementById("txt").value;
             const iframe = document.getElementById("iframe-output");
-            let content = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Preview</title>
-                    <style>
-                        body {
-                            ${document.getElementById('background-image-url').value ? `background-image: url('${document.getElementById('background-image-url').value}'); background-size: cover;` : ''}
-                        }
-                    </style>
-                </head>
-                <body>
-                    ${inputText}
-                </body>
-                </html>
-            `;
-            const doc = iframe.contentDocument || iframe.contentWindow.document;
-            doc.open();
-            doc.write(content);
-            doc.close();
+            let processedHTML = inputText;
+
+            for (let i = 0; i < uploadedImageDataURLs.length; i++) {
+                const code = `[image${i + 1}]`;
+                const dataURL = uploadedImageDataURLs[i];
+                processedHTML = processedHTML.replaceAll(code, `<img src="${dataURL}" style="max-width: 100%;">`);
+            }
+
+            iframe.srcdoc = processedHTML;
         }
 
         function download() {
-            const inputText = document.getElementById("txt").value;
-            const blob = new Blob([inputText], { type: "text/html" });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = "download.html";
-            link.click();
-            URL.revokeObjectURL(link.href);
+            const text = document.getElementById("txt").value;
+            const filename = "index.html";
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
         }
 
         function loadFile(event) {
@@ -408,9 +358,9 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById("txt").value = e.target.result;
+                    document.getElementById('txt').value = e.target.result;
                     updateLineNumbers();
-                };
+                }
                 reader.readAsText(file);
             }
         }
@@ -419,12 +369,14 @@
             const file = event.target.files[0];
             const reader = new FileReader();
             reader.onloadend = function() {
-                uploadedImageBase64 = reader.result;
-                document.getElementById('uploaded-image-preview').src = uploadedImageBase64;
+                const dataURL = reader.result;
+                uploadedImageDataURLs.push(dataURL);
+                imageCount++;
+                document.getElementById('uploaded-image-preview').src = dataURL;
                 document.getElementById('uploaded-image-preview').style.display = 'block';
-                const imgTag = `<img src="${uploadedImageBase64}" alt="Uploaded Image">`;
+                const imageCode = `[image${imageCount}]`;
                 const currentText = document.getElementById('txt').value;
-                document.getElementById('txt').value = currentText + '\n' + imgTag;
+                document.getElementById('txt').value = currentText + '\n' + imageCode;
                 updateLineNumbers();
             }
             if (file) {
@@ -432,32 +384,78 @@
             }
         }
 
-        function setBackground() {
-            run(); // Re-run to apply the background image
+        function downloadCompiler() {
+            const htmlContent = document.documentElement.outerHTML;
+            const filename = "offline_html_compiler.html";
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }
-
-        document.addEventListener('click', function(event) {
-            const suggestionsDiv = document.getElementById('suggestions');
-            if (!document.getElementById('input').contains(event.target)) {
-                suggestionsDiv.style.display = 'none';
-            }
-        });
 
         updateLineNumbers();
 
+        const colorInput = document.getElementById('colorInput');
+        const selectedColorDiv = document.getElementById('selectedColor');
+        const colorCodeDiv = document.getElementById('colorCode');
+        const textarea = document.getElementById('txt');
+        let lastCursorPosition = 0;
 
-  function triggerDownload() {
-    const link = document.createElement('a');
-    link.href = 'Offline_HTML_Compiler.html'; // Path to your existing HTML file
-    link.download = 'Offline Html Compiler.html
-'; // Optional suggested filename
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-   
+        function updateColorDisplay(color) {
+            selectedColorDiv.style.backgroundColor = color;
+            colorCodeDiv.textContent = color;
+        }
 
-        
-    </script>
+        function insertColorCode(color) {
+            const startPos = lastCursorPosition;
+            const endPos = lastCursorPosition;
+            const textBefore = textarea.value.substring(0, startPos);
+            const textAfter = textarea.value.substring(endPos, textarea.value.length);
+
+            textarea.value = textBefore + color + textAfter;
+
+            // Update cursor position after insertion
+            textarea.selectionStart = startPos + color.length;
+            textarea.selectionEnd = startPos + color.length;
+
+            // Optionally, update the selected color display
+            updateColorDisplay(color);
+            textarea.focus(); // Keep focus on the textarea
+        }
+
+        colorInput.addEventListener('input', (event) => {
+            updateColorDisplay(event.target.value);
+            insertColorCode(event.target.value);
+        });
+
+        textarea.addEventListener('click', (event) => {
+            lastCursorPosition = textarea.selectionStart;
+        });
+
+        textarea.addEventListener('keyup', (event) => {
+            lastCursorPosition = textarea.selectionStart;
+        });
+
+        // Initialize with the default color
+        updateColorDisplay(colorInput.value);
+    
+                const helpDiv = document.getElementById("help-div");
+        const helpButtonElement = document.getElementById('help-button');
+        const closeHelpButton = helpDiv.querySelector('button');
+
+        function toggleHelp() {
+            helpDiv.style.display = helpDiv.style.display === "block" ? "none" : "block";
+        }
+
+        if (closeHelpButton) closeHelpButton.onclick = toggleHelp;
+
+
+</script>
+
 </body>
 </html>
