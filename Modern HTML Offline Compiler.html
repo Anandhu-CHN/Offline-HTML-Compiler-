@@ -669,4 +669,183 @@ Modern Offline HTML Compiler
 
     // Create a mapping of shortcuts to filenames
     const imageFilenameMap = {};
-    for (let i = 0; i < uploadedIm
+    for (let i = 0; i < uploadedImageNames.length; i++) {
+        const shortcut = `[image${i + 1}]`;
+        imageFilenameMap[shortcut] = uploadedImageNames[i];
+    }
+
+    // Replace the shortcuts in the text with filenames
+    for (const shortcut in imageFilenameMap) {
+        const filenameToReplace = imageFilenameMap[shortcut];
+        // Use a regular expression to replace all occurrences of the shortcut
+        const regex = new RegExp(shortcut.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g');
+        text = text.replace(regex, filenameToReplace);
+    }
+
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('txt').value = e.target.result;
+                    updateLineNumbers();
+                }
+                reader.readAsText(file);
+            }
+        }
+
+        function uploadImages(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onloadend = function() {
+                    const dataURL = reader.result;
+                    uploadedImageDataURLs.push(dataURL);
+                    uploadedImageNames.push(file.name); // Store the file name
+                    imageCount++;
+                    addImagePreview(dataURL, uploadedImageDataURLs.length - 1);
+                    addImageShortcut(`[image${uploadedImageDataURLs.length}]`);
+                }
+                if (file) {
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function addImagePreview(dataURL, index) {
+            const img = document.createElement('img');
+            img.src = dataURL;
+            img.classList.add('uploaded-image-preview');
+            img.addEventListener('click', () => {
+                // Deselect previous selection
+                const selected = document.querySelector('.uploaded-image-preview.selected');
+                if (selected) {
+                    selected.classList.remove('selected');
+                }
+                img.classList.add('selected');
+                selectedImageIndex = index;
+            });
+            uploadedImagePreviewContainer.appendChild(img);
+        }
+
+        function addImageShortcut(shortcut) {
+            const shortcutDiv = document.createElement('div');
+            shortcutDiv.classList.add('image-shortcut');
+            shortcutDiv.textContent = shortcut;
+            shortcutDiv.addEventListener('click', () => {
+                const currentText = document.getElementById('txt').value;
+                const cursorPosition = document.getElementById('txt').selectionStart;
+                const newText = currentText.substring(0, cursorPosition) + shortcut + currentText.substring(document.getElementById('txt').selectionEnd);
+                document.getElementById('txt').value = newText;
+                document.getElementById('txt').selectionStart = cursorPosition + shortcut.length;
+                document.getElementById('txt').selectionEnd = cursorPosition + shortcut.length;
+                document.getElementById('txt').focus();
+            });
+
+            const previewLink = document.createElement('span');
+            previewLink.textContent = ' (Preview)';
+            previewLink.style.cursor = 'pointer';
+            previewLink.style.marginLeft = '5px';
+            previewLink.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent shortcut click
+                imagePreviewElement.src = uploadedImageDataURLs[parseInt(shortcut.replace('[image', '').replace(']', '')) - 1];
+                imagePreviewModal.style.display = 'flex';
+            });
+            shortcutDiv.appendChild(previewLink);
+
+            imageShortcutsContainer.appendChild(shortcutDiv);
+        }
+
+        imagePreviewModal.addEventListener('click', (event) => {
+            if (event.target === imagePreviewModal) {
+                imagePreviewModal.style.display = 'none';
+            }
+        });
+
+        function downloadCompiler() {
+            const htmlContent = document.documentElement.outerHTML;
+            const filename = "offline_html_compiler.html";
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        updateLineNumbers();
+
+        const colorInput = document.getElementById('colorInput');
+        const selectedColorDiv = document.getElementById('selectedColor');
+        const colorCodeDiv = document.getElementById('colorCode');
+        const textarea = document.getElementById('txt');
+        let lastCursorPosition = 0;
+
+        function updateColorDisplay(color) {
+            selectedColorDiv.style.backgroundColor = color;
+            colorCodeDiv.textContent = color;
+        }
+
+        function insertColorCode(color) {
+            const startPos = lastCursorPosition;
+            const endPos = lastCursorPosition;
+            const textBefore = textarea.value.substring(0, startPos);
+            const textAfter = textarea.value.substring(endPos, textarea.value.length);
+
+            textarea.value = textBefore + color + textAfter;
+
+            // Update cursor position after insertion
+            textarea.selectionStart = startPos + color.length;
+            textarea.selectionEnd = startPos + color.length;
+
+            // Optionally, update the selected color display
+            updateColorDisplay(color);
+            textarea.focus(); // Keep focus on the textarea
+        }
+
+        colorInput.addEventListener('input', (event) => {
+            updateColorDisplay(event.target.value);
+            insertColorCode(event.target.value);
+        });
+
+        textarea.addEventListener('click', (event) => {
+            lastCursorPosition = textarea.selectionStart;
+        });
+
+        textarea.addEventListener('keyup', (event) => {
+            lastCursorPosition = textarea.selectionStart;
+        });
+
+        // Initialize with the default color
+        updateColorDisplay(colorInput.value);
+
+        const helpDiv = document.getElementById("help-div");
+        const helpButtonElement = document.getElementById('help-button');
+        const closeHelpButton = helpDiv.querySelector('button');
+
+        function toggleHelp() {
+            helpDiv.style.display = helpDiv.style.display === "block" ? "none" : "block";
+        }
+
+        if (closeHelpButton) closeHelpButton.onclick = toggleHelp;
+
+    </script>
+
+</body>
+
+</html>
