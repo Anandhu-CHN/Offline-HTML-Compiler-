@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Offline HTML Compiler</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        #compiler-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #input-area {
+            display: flex;
+            flex-direction: initial;
+            /* Or you can use 'row' */
+            border-bottom: 1px solid #eee;
+        }
+
+        #line-numbers {
+            padding: 15px;
+            background-color: #2d3436;
+            color: #dfe6e9;
+            text-align: right;
+            user-select: none;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            height: 400px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            border-right: 1px solid #34495e;
+        }
+
+        #txt {
+            background-color: #2c3e50;
+            color: #f0f0f0;
+            width: 100%;
+            height: 400px;
+            border: none;
+            padding: 15px;
+            box-sizing: border-box;
+            resize: none;
+            font-family: 'Consolas', monospace;
+            overflow-y: auto;
+            outline: none;
+        }
+
+        #output-area {
+            width: 100%;
+            height: 500px;
+            background-color: #ecf0f1;
+            border-top: 1px solid #ddd;
+            overflow: hidden;
+        }
+
+        #iframe-output {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .controls {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        #file-input {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        .suggestions {
+            position: absolute;
+            background: #fff;
+            border: 1px solid #ccc;
+            z-index: 1000;
+            width: calc(100% - 30px);
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .suggestions div {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .suggestions div:hover {
+            background-color: #f0f0f0;
+        }
+
+        .tag {
+            color: #27ae60;
+        }
+
+        .id {
+            color: #3498db;
+        }
+
+        #image-upload-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #image-upload {
+            background-color: #8e44ad;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #image-upload:hover {
+            background-color: #753b83;
+        }
+
+        #image-upload-input {
+            display: none;
+        }
+
+        #uploaded-image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            overflow-x: auto;
+            max-width: 100%;
+            margin-left: 0;
+        }
+
+        .uploaded-image-preview {
+            max-width: 80px;
+            max-height: 80px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .uploaded-image-preview.selected {
+            border: 3px solid #f39c12;
+        }
+
+        #download-compiler {
+            background-color: #e67e22;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #download-compiler:hover {
+            background-color: #d35400;
+        }
+
+        .color-picker-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        #colorInput {
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            cursor: pointer;
+            flex-grow: 1;
+            min-width: 0;
+        }
+
+        #selectedColor {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #000;
+            border-radius: 5px;
+        }
+
+        #colorCode {
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            color: #555;
+        }
+
+        #help-button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #help-button:hover {
+            background-color: #27ae60;
+        }
+
+        #help-div {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        #help-div h3 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        #help-div ul {
+            padding-left: 20px;
+        }
+
+        #help-div li {
+            margin-bottom: 8px;
+        }
+
+        #help-div strong {
+            font-weight: bold;
+        }
+
+        #help-div button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        #help-div button:hover {
+            background-color: #c0392b;
+        }
+
+        #image-shortcuts-container {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+
+        #image-shortcuts-container h3 {
+            margin-top: 0;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        #image-shortcuts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .image-shortcut {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 5px;
+        }
+
+        .image-shortcut:hover {
+            background-color: #eee;
+        }
+
+        #image-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        #image-preview-modal img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        #b {
+            align-items: left;
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        /* Styles for Creator's Functions */
+        #creator-functions-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        #creator-functions-button:hover {
+            background-color: #0056b3;
+        }
+
+        #creator-functions-div {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            /* Needed for positioning the add button */
+        }
+
+        #creator-functions-div h3 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #creator-functions-div input[type="search"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        #creator-functions-list {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #fdfdfd;
+        }
+
+        #creator-functions-list li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        #creator-functions-list li:last-child {
+            border-bottom: none;
+        }
+
+        #creator-functions-list li:hover {
+            background-color: #f0f0f0;
+        }
+
+        #creator-functions-list li strong {
+            color: #3498db;
+        }
+
+        /* New Add Function Button */
+        #add-function-btn {
+            background-color: #28a745;
+            /* Green */
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            line-height: 1;
+            /* For better '+' alignment */
+            transition: background-color 0.3s ease;
+            position: absolute;
+            /* Position relative to creator-functions-div */
+            right: 15px;
+            /* Adjust as needed */
+            top: 15px;
+            /* Adjust as needed */
+            width: 35px;
+            /* Fixed width for a square button */
+            height: 35px;
+            /* Fixed height for a square button */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #add-function-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Modal Styles */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            /* Below actual modal */
+        }
+
+        #add-function-modal {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+            z-index: 1001;
+            /* Above backdrop */
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #add-function-modal h4 {
+            margin-top: 0;
+            color: #333;
+            text-align: center;
+        }
+
+        #add-function-modal label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+            color: #555;
+        }
+
+        #add-function-modal input[type="text"],
+        #add-function-modal textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        #add-function-modal textarea {
+            min-height: 150px;
+            resize: vertical;
+            font-family: 'Consolas', monospace;
+        }
+
+        #add-function-modal .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        #add-function-modal .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        #add-function-modal .modal-buttons button.add {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #add-function-modal .modal-buttons button.add:hover {
+            background-color: #0056b3;
+        }
+
+        #add-function-modal .modal-buttons button.cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #add-function-modal .modal-buttons button.cancel:hover {
+            background-color: #c82333;
+        }
+
+
+        /* Media Queries for Responsiveness */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            #compiler-container {
+                width: 100%;
+            }
+
+            #input-area {
+                flex-direction: initial;
+            }
+
+            #line-numbers {
+                width: 5%;
+                height: 400px;
+                border-right: none;
+                border-bottom: 1px solid #34495e;
+                overflow: auto;
+            }
+
+            #txt {
+                height: 400px;
+                width: 94%;
+                overflow: auto;
+            }
+
+            #output-area {
+                height: 400px;
+            }
+
+            .controls {
+                flex-wrap: wrap;
+            }
+
+            .button {
+                width: auto;
+                flex-grow: 1;
+            }
+
+            #file-input {
+                width: 100%;
+            }
+
+            #image-upload-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #image-upload,
+            #download-compiler,
+            #creator-functions-button {
+                /* Added for responsiveness */
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            #uploaded-image-preview-container {
+                max-width: 100%;
+            }
+
+            .color-picker-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #colorInput {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            #b {
+                height: auto;
+            }
+
+            #add-function-btn {
+                position: static;
+                /* Remove absolute positioning on small screens */
+                margin-top: 10px;
+                width: 100%;
+                /* Full width */
+                height: auto;
+                font-size: 1em;
+            }
+        }
+
+        h1 {
+            color: #0026ff;
+            font-family: Sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="b">
+        <button id="help-button" onclick="toggleHelp()">Help</button>
+
+        <h1>
+            Modern Offline HTML Compiler
+        </h1>
+
+    </div>
+    <div id="help-div">
+        <h3>Help Guide</h3>
+        <p>Welcome to the Modern Offline HTML Compiler!</p>
+        <p>Here are some features you can use:</p>
+        <ul>
+            <li><strong>Tag Suggestions:</strong> Start typing a tag (e.g., `&lt;div&gt;`) to see suggestions.</li>
+            <li><strong>Auto Closing Tags:</strong> When you type a tag and end with `&gt;`, the closing tag is added.
+            </li>
+            <li><strong>HTML Structure Shortcut:</strong> Type `#!` and press `Enter` for a basic HTML structure.</li>
+            <li><strong>File Upload:</strong> Load an existing HTML file using the "Choose File" button.</li>
+            <li><strong>Run:</strong> Click "Run" to preview your HTML code live.</li>
+            <li><strong>Download:</strong> Save your HTML as a file by clicking "Download".</li>
+            <li><strong>Image Upload:</strong> Use "Upload Image" to upload multiple images. Click on the previews to
+                select an image for use with the
+                `[selected-image]` placeholder.</li>
+            <li><strong>Image Shortcuts:</strong> Use the provided shortcuts (e.g., `[image1]`, `[image2]`) directly
+                in your HTML.</li>
+            <li><strong>Color Picker:</strong> Select colors to insert their hex code directly into your code.</li>
+            <li><strong>Download Compiler:
+                </strong> Save this entire page as an HTML file to use the compiler offline.
+            </li>
+            <li><strong>JavaScript Function Suggestions:</strong> Start typing common JavaScript functions (e.g.,
+                `doc`, `con`, `get`) to get suggestions.</li>
+        </ul>
+        <button onclick="toggleHelp()">Close</button>
+    </div>
+
+    <div class="color-picker-container">
+        <input type="color" id="colorInput" value="#007bff">
+        <div id="selectedColor" style="background-color: #007bff;"></div>
+        <div id="colorCode">#007bff</div>
+    </div>
+
+    <div id="image-upload-container">
+        <button id="image-upload" onclick="document.getElementById('image-upload-input').click()">Upload Image</button>
+        <input type="file" id="image-upload-input" accept="image/*" multiple onchange="uploadImages(event)">
+        <div id="uploaded-image-preview-container">
+        </div>
+        <button id="download-compiler" onclick="downloadCompiler()">Download Compiler</button>
+        <button id="creator-functions-button" onclick="toggleCreatorFunctions()">Creator's Functions</button>
+    </div>
+
+    <div id="creator-functions-div">
+        <h3>Creator's Functions</h3>
+        <input type="search" id="creator-functions-search" placeholder="Search functions by name or feature..."
+            oninput="searchCreatorFunctions()">
+        <button id="add-function-btn" onclick="showAddFunctionModal()">+</button>
+        <ul id="creator-functions-list">
+        </ul>
+        <button onclick="toggleCreatorFunctions()">Close</button>
+    </div>
+
+    <div id="image-shortcuts-container">
+        <h3>Image Shortcuts</h3>
+        <div id="image-shortcuts">
+        </div>
+    </div>
+
+    <div id="compiler-container">
+        <div id="input-area">
+            <div id="line-numbers">1</div>
+            <textarea id="txt" oninput="updateLineNumbers(); showSuggestions(event)" onkeydown="handleKeyDown(event)"
+                autocomplete="off"></textarea>
+            <div id="suggestions" class="suggestions"></div>
+        </div>
+        <div class="controls">
+            <input type="file" id="file-input" accept=".html" onchange="loadFile(event)">
+            <button class="button" id="run" onclick="run()">Run</button>
+            <button class="button" id="download" onclick="download()">Download</button>
+        </div>
+        <div id="output-area">
+            <iframe id="iframe-output"></iframe>
+        </div>
+    </div>
+
+    <div id="image-preview-modal">
+        <img src="" alt="Image Preview">
+    </div>
+
+    <div class="modal-backdrop" id="add-function-backdrop"></div>
+    <div id="add-function-modal">
+        <h4>Add New Creator Function</h4>
+        <label for="function-name-input">Function Name:</label>
+        <input type="text" id="function-name-input" placeholder="e.g., myFunction">
+
+        <label for="function-feature-input">Feature/Description:</label>
+        <input type="text" id="function-feature-input" placeholder="e.g., Handles user input validation.">
+
+        <label for="function-definition-textarea">Function Code/Definition:</label>
+        <textarea id="function-definition-textarea"
+            placeholder="function myFunction(param) { /* code here */ }"></textarea>
+
+        <div class="modal-buttons">
+            <button class="add" onclick="addCustomFunction()">Add Function</button>
+            <button class="cancel" onclick="hideAddFunctionModal()">Cancel</button>
+        </div>
+    </div>
+
+
+    <script>
+        const tagPairs = {
+            'html': '/html',
+            'head': '/head',
+            'title': '/title',
+            'body': '/body',
+            'div': '/div',
+            'span': '/span',
+            'p': '/p',
+            'h1': '/h1',
+            'h2': '/h2',
+            'h3': '/h3',
+            'h4': '/h4',
+            'h5': '/h5',
+            'h6': '/h6',
+            'a': '/a',
+            'img': null,
+            'ul': '/ul',
+            'ol': '/ol',
+            'li': '/li',
+            'table': '/table',
+            'tr': '/tr',
+            'td': '/td',
+            'th': '/th',
+            'form': '/form',
+            'input': null,
+            'button': '/button',
+            'textarea': '/textarea',
+            'select': '/select',
+            'option': '/option',
+            'script': '/script'
+        };
+
+        // Added JavaScript function suggestions
+        const jsFunctionsSuggestions = [
+            { name: "document.getElementById()", description: "Selects an element by its ID.", insert: "document.getElementById('')" },
+            { name: "document.querySelector()", description: "Selects the first element that matches a specified CSS selector.", insert: "document.querySelector('')" },
+            { name: "document.querySelectorAll()", description: "Selects all elements that match a specified CSS selector.", insert: "document.querySelectorAll('')" },
+            { name: "document.createElement()", description: "Creates a new HTML element.", insert: "document.createElement('')" },
+            { name: "document.body.appendChild()", description: "Adds a node to the end of the list of children of a specified parent node.", insert: "document.body.appendChild()" },
+            { name: "console.log()", description: "Outputs a message to the web console.", insert: "console.log()" },
+            { name: "parseInt()", description: "Parses a string argument and returns an integer.", insert: "parseInt()" },
+            { name: "parseFloat()", description: "Parses a string argument and returns a floating-point number.", insert: "parseFloat()" },
+            { name: "setTimeout()", description: "Executes a function, or evaluates an expression, after a specified delay.", insert: "setTimeout(() => {}, )" },
+            { name: "setInterval()", description: "Repeatedly calls a function or executes a code snippet, with a fixed time delay between each call.", insert: "setInterval(() => {}, )" },
+            { name: "clearTimeout()", description: "Clears a timer set with setTimeout().", insert: "clearTimeout()" },
+            { name: "clearInterval()", description: "Clears a timer set with setInterval().", insert: "clearInterval()" },
+            { name: "addEventListener()", description: "Attaches an event handler to the specified element.", insert: ".addEventListener('', () => {})" },
+            { name: "removeEventListener()", description: "Removes an event handler that has been attached with the addEventListener() method.", insert: ".removeEventListener('', () => {})" },
+            { name: "fetch()", description: "Provides an easy, logical way to fetch resources asynchronously across the network.", insert: "fetch('')" },
+            { name: "JSON.parse()", description: "Parses a JSON string, constructing the JavaScript value or object described by the string.", insert: "JSON.parse()" },
+            { name: "JSON.stringify()", description: "Converts a JavaScript value to a JSON string.", insert: "JSON.stringify()" },
+            { name: "Array.prototype.map()", description: "Creates a new array populated with the results of calling a provided function on every element in the calling array.", insert: ".map(() => {})" },
+            { name: "Array.prototype.filter()", description: "Creates a new array with all elements that pass the test implemented by the provided function.", insert: ".filter(() => {})" },
+            { name: "Array.prototype.reduce()", description: "Executes a reducer function on each element of the array, resulting in single output value.", insert: ".reduce(() => {}, initialValue)" },
+            { name: "String.prototype.includes()", description: "Determines whether one string may be found within another string.", insert: ".includes('')" },
+            { name: "String.prototype.indexOf()", description: "Returns the first index at which a given element can be found in the array, or -1 if it is not present.", insert: ".indexOf('')" },
+            { name: "Math.random()", description: "Returns a floating-point, pseudo-random number.", insert: "Math.random()" },
+            { name: "Math.floor()", description: "Returns the largest integer less than or equal to a given number.", insert: "Math.floor()" },
+            { name: "Math.ceil()", description: "Returns the smallest integer greater than or equal to a given number.", insert: "Math.ceil()" },
+            { name: "Date.now()", description: "Returns the number of milliseconds elapsed since January 1, 1970 00:00:00 UTC.", insert: "Date.now()" },
+            { name: "new Date()", description: "Creates a new Date object.", insert: "new Date()" },
+            { name: "localStorage.setItem()", description: "Adds a key-value pair to web storage.", insert: "localStorage.setItem('', '')" },
+            { name: "localStorage.getItem()", description: "Returns the value of the specified storage object item.", insert: "localStorage.getItem('')" },
+            { name: "localStorage.removeItem()", description: "Removes the specified storage object item.", insert: "localStorage.removeItem('')" },
+            { name: "sessionStorage.setItem()", description: "Adds a key-value pair to session storage.", insert: "sessionStorage.setItem('', '')" },
+            { name: "sessionStorage.getItem()", description: "Returns the value of the specified session storage object item.", insert: "sessionStorage.getItem('')" },
+            { name: "history.back()", description: "Goes back one step in the browser's history.", insert: "history.back()" },
+            { name: "history.forward()", description: "Goes forward one step in the browser's history.", insert: "history.forward()" },
+            { name: "window.open()", description: "Opens a new browser window or a new tab.", insert: "window.open('')" },
+            { name: "window.close()", description: "Closes the current window.", insert: "window.close()" },
+            { name: "alert()", description: "Displays an alert box with a specified message and an OK button.", insert: "alert('')" },
+            { name: "confirm()", description: "Displays a dialog box with a specified message, along with an OK and a Cancel button.", insert: "confirm('')" },
+            { name: "prompt()", description: "Displays a dialog box that prompts the visitor for input.", insert: "prompt('')" },
+            { name: "URL.createObjectURL()", description: "Creates a DOMString containing a URL representing the object given in the parameter.", insert: "URL.createObjectURL()" },
+            { name: "URL.revokeObjectURL()", description: "Revokes a URL created with URL.createObjectURL().", insert: "URL.revokeObjectURL()" },
+            { name: "FileReader.prototype.readAsDataURL()", description: "Starts reading the contents of the specified Blob or File.", insert: "reader.readAsDataURL()" },
+            { name: "FileReader.prototype.readAsText()", description: "Starts reading the contents of the specified Blob or File, as text.", insert: "reader.readAsText()" },
+            { name: "document.forms", description: "Returns a collection of all <form> elements in the document.", insert: "document.forms" },
+            { name: "document.images", description: "Returns a collection of all <img> elements in the document.", insert: "document.images" },
+            { name: "document.links", description: "Returns a collection of all <a> elements that have a href attribute in the document.", insert: "document.links" },
+            { name: "element.innerHTML", description: "Sets or returns the HTML content (inner HTML) of an element.", insert: ".innerHTML = ''" },
+            { name: "element.textContent", description: "Sets or returns the text content of an element.", insert: ".textContent = ''" },
+            { name: "element.style", description: "Used to get and set the inline style of an element.", insert: ".style." },
+            { name: "element.classList.add()", description: "Adds one or more class names to an element.", insert: ".classList.add('')" },
+            { name: "element.classList.remove()", description: "Removes one or more class names from an element.", insert: ".classList.remove('')" },
+            { name: "element.classList.toggle()", description: "Toggles between adding and removing a class name from an element.", insert: ".classList.toggle('')" },
+            { name: "element.setAttribute()", description: "Sets the value of an attribute on the specified element.", insert: ".setAttribute('', '')" },
+            { name: "element.getAttribute()", description: "Returns the value of a specified attribute on the element.", insert: ".getAttribute('')" },
+            { name: "element.removeAttribute()", description: "Removes a specified attribute from an element.", insert: ".removeAttribute('')" },
+            { name: "element.hasAttribute()", description: "Returns a boolean value indicating whether the current element has the specified attribute.", insert: ".hasAttribute('')" },
+            { name: "element.appendChild()", description: "Adds a node to the end of the list of children of a specified parent node.", insert: ".appendChild()" },
+            { name: "element.removeChild()", description: "Removes a child node from the DOM.", insert: ".removeChild()" },
+            { name: "element.insertBefore()", description: "Inserts a node as a child, right before an existing child.", insert: ".insertBefore(, )" },
+            { name: "element.replaceChild()", description: "Replaces a child node with a new node.", insert: ".replaceChild(, )" },
+            { name: "element.cloneNode()", description: "Creates a copy of a node, and returns the clone.", insert: ".cloneNode(true)" },
+            { name: "element.focus()", description: "Sets focus on the specified element.", insert: ".focus()" },
+            { name: "element.blur()", description: "Removes focus from the specified element.", insert: ".blur()" },
+            { name: "element.scrollIntoView()", description: "Scrolls the element into the visible area of the browser window.", insert: ".scrollIntoView()" },
+            { name: "event.preventDefault()", description: "Cancels the event if it is cancelable, meaning that the default action that belongs to the event will not occur.", insert: "event.preventDefault()" },
+            { name: "event.stopPropagation()", description: "Prevents further propagation of the current event in the capturing and bubbling phases.", insert: "event.stopPropagation()" },
+            { name: "event.target", description: "A reference to the object that dispatched the event.", insert: "event.target" },
+            { name: "window.scrollTo()", description: "Scrolls to a particular set of coordinates in the document.", insert: "window.scrollTo(,)" },
+            { name: "window.scrollBy()", description: "Scrolls the document by the specified number of pixels.", insert: "window.scrollBy(,)" },
+            { name: "window.resizeTo()", description: "Resizes the current window to the specified width and height.", insert: "window.resizeTo(,)" },
+            { name: "window.moveTo()", description: "Moves the current window to the specified coordinates.", insert: "window.moveTo(,)" },
+            { name: "encodeURIComponent()", description: "Encodes a Uniform Resource Identifier (URI) component by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.", insert: "encodeURIComponent('')" },
+            { name: "decodeURIComponent()", description: "Decodes a Uniform Resource Identifier (URI) component previously created by encodeURIComponent or by a similar routine.", insert: "decodeURIComponent('')" },
+            { name: "JSON.parse()", description: "Parses a JSON string, constructing the JavaScript value or object described by the string.", insert: "JSON.parse()" },
+            { name: "JSON.stringify()", description: "Converts a JavaScript value to a JSON string.", insert: "JSON.stringify()" },
+            { name: "Number.isNaN()", description: "Determines whether the passed value is the number value NaN.", insert: "Number.isNaN()" },
+            { name: "Array.isArray()", description: "Determines whether the passed value is an Array.", insert: "Array.isArray()" },
+            { name: "Object.keys()", description: "Returns an array of a given object's own enumerable property names.", insert: "Object.keys()" },
+            { name: "Object.values()", description: "Returns an array of a given object's own enumerable property values.", insert: "Object.values()" },
+            { name: "Object.entries()", description: "Returns an array of a given object's own enumerable string-keyed property [key, value] pairs.", insert: "Object.entries()" },
+            { name: "Promise.resolve()", description: "Returns a Promise object that is resolved with a given value.", insert: "Promise.resolve()" },
+            { name: "Promise.reject()", description: "Returns a Promise object that is rejected with a given reason.", insert: "Promise.reject()" },
+            { name: "Promise.all()", description: "Returns a single Promise that resolves when all of the promises in the iterable argument have resolved.", insert: "Promise.all([])" },
+            { name: "Promise.race()", description: "Returns a promise that fulfills or rejects as soon as one of the promises in the iterable fulfills or rejects, with the value or reason from that promise.", insert: "Promise.race([])" },
+            { name: "async function", description: "Defines an asynchronous function, which returns an AsyncFunction object.", insert: "async function name() {}" },
+            { name: "await", description: "Waits for a Promise.", insert: "await " },
+            { name: "try...catch", description: "Handles errors in a block of code.", insert: "try {} catch (error) {}" },
+            { name: "throw", description: "Throws a user-defined exception.", insert: "throw new Error('')" },
+            { name: "new Map()", description: "Creates a new Map object.", insert: "new Map()" },
+            { name: "Map.prototype.set()", description: "Adds a new element with a specified key and value to the Map object.", insert: ".set('', '')" },
+            { name: "Map.prototype.get()", description: "Returns the value associated with the specified key, or undefined if there is none.", insert: ".get('')" },
+            { name: "Map.prototype.has()", description: "Returns a boolean indicating whether an element with the specified key exists or not.", insert: ".has('')" },
+            { name: "Map.prototype.delete()", description: "Removes the specified element from a Map object by key.", insert: ".delete('')" },
+            { name: "Map.prototype.clear()", description: "Removes all key-value pairs from the Map object.", insert: ".clear()" },
+            { name: "new Set()", description: "Creates a new Set object.", insert: "new Set()" },
+            { name: "Set.prototype.add()", description: "Adds a new element with a specified value to the Set object.", insert: ".add('')" },
+            { name: "Set.prototype.has()", description: "Returns a boolean indicating whether an element with the specified value exists in the Set object or not.", insert: ".has('')" },
+            { name: "Set.prototype.delete()", description: "Removes the specified element from a Set object.", insert: ".delete('')" },
+            { name: "Set.prototype.clear()", description: "Removes all elements from the Set object.", insert: ".clear()" },
+            { name: "String.prototype.toUpperCase()", description: "Converts a string to uppercase letters.", insert: ".toUpperCase()" },
+            { name: "String.prototype.toLowerCase()", description: "Converts a string to lowercase letters.", insert: ".toLowerCase()" },
+            { name: "String.prototype.trim()", description: "Removes whitespace from both ends of a string.", insert: ".trim()" },
+            { name: "String.prototype.startsWith()", description: "Determines whether a string begins with the characters of a specified string.", insert: ".startsWith('')" },
+            { name: "String.prototype.endsWith()", description: "Determines whether a string ends with the characters of a specified string.", insert: ".endsWith('')" },
+            { name: "String.prototype.substring()", description: "Extracts characters from a string between two specified indices.", insert: ".substring(,)" },
+            { name: "String.prototype.slice()", description: "Extracts a section of a string and returns it as a new string.", insert: ".slice(,)" },
+            { name: "Array.prototype.push()", description: "Adds one or more elements to the end of an array and returns the new length of the array.", insert: ".push()" },
+            { name: "Array.prototype.pop()", description: "Removes the last element from an array and returns that element.", insert: ".pop()" },
+            { name: "Array.prototype.shift()", description: "Removes the first element from an array and returns that removed element.", insert: ".shift()" },
+            { name: "Array.prototype.unshift()", description: "Adds one or more elements to the beginning of an array and returns the new length of the array.", insert: ".unshift()" },
+            { name: "Array.prototype.splice()", description: "Changes the contents of an array by removing or replacing existing elements and/or adding new elements in place.", insert: ".splice(,)" },
+            { name: "Array.prototype.concat()", description: "Used to merge two or more arrays.", insert: ".concat()" },
+            { name: "Array.prototype.join()", description: "Creates and returns a new string by concatenating all of the elements in an array (or an array-like object), separated by commas or a specified separator string.", insert: ".join('')" },
+            { name: "Array.prototype.slice()", description: "Returns a shallow copy of a portion of an array into a new array object selected from start to end (end not included) where start and end represent the index of items in that array.", insert: ".slice(,)" },
+            { name: "Array.prototype.forEach()", description: "Executes a provided function once for each array element.", insert: ".forEach(() => {})" },
+            { name: "Array.prototype.some()", description: "Tests whether at least one element in the array passes the test implemented by the provided function.", insert: ".some(() => {})" },
+            { name: "Array.prototype.every()", description: "Tests whether all elements in the array pass the test implemented by the provided function.", insert: ".every(() => {})" },
+            { name: "Array.prototype.find()", description: "Returns the value of the first element in the array that satisfies the provided testing function.", insert: ".find(() => {})" },
+            { name: "Array.prototype.findIndex()", description: "Returns the index of the first element in the array that satisfies the provided testing function.", insert: ".findIndex(() => {})" },
+            { name: "Object.assign()", description: "Copies all enumerable own properties from one or more source objects to a target object.", insert: "Object.assign(,)" },
+            { name: "Number.parseInt()", description: "Parses a string argument and returns an integer of the specified radix (the base in mathematical numeral systems).", insert: "Number.parseInt()" },
+            { name: "Number.parseFloat()", description: "Parses a string argument and returns a floating point number.", insert: "Number.parseFloat()" },
+            { name: "console.warn()", description: "Outputs a warning message to the web console.", insert: "console.warn('')" },
+            { name: "console.error()", description: "Outputs an error message to the web console.", insert: "console.error('')" },
+            { name: "document.write()", description: "Writes a string of text to a document stream opened by document.open().", insert: "document.write('')" },
+            { name: "history.pushState()", description: "Pushes the given data onto the session history stack.", insert: "history.pushState({}, '', '')" },
+            { name: "history.replaceState()", description: "Updates the most recent entry on the history stack.", insert: "history.replaceState({}, '', '')" },
+            { name: "location.href", description: "Sets or returns the entire URL of the current page.", insert: "location.href = ''" },
+            { name: "location.reload()", description: "Reloads the current document.", insert: "location.reload()" },
+            { name: "navigator.userAgent", description: "Returns the user-agent string for the current browser.", insert: "navigator.userAgent" },
+            { name: "screen.width", description: "Returns the width of the user's screen.", insert: "screen.width" },
+            { name: "screen.height", description: "Returns the height of the user's screen.", insert: "screen.height" },
+            { name: "window.innerWidth", description: "Gets the width of the content area of the browser window including scrollbars.", insert: "window.innerWidth" },
+            { name: "window.innerHeight", description: "Gets the height of the content area of the browser window including scrollbars.", insert: "window.innerHeight" },
+            { name: "element.getBoundingClientRect()", description: "Returns a DOMRect object providing information about the size of an element and its position relative to the viewport.", insert: ".getBoundingClientRect()" },
+            { name: "XMLHttpRequest", description: "Used to interact with servers. You can retrieve data from a URL without having to do a full page refresh.", insert: "new XMLHttpRequest()" },
+            { name: "URLSearchParams", description: "Defines utility methods to work with the query string of a URL.", insert: "new URLSearchParams('')" },
+            { name: "WebAssembly.instantiate()", description: "Compiles and instantiates a WebAssembly module.", insert: "WebAssembly.instantiate()" },
+            { name: "Worker", description: "Creates a Web Worker object that executes a script in the background independently of other scripts, without interfering with the performance of the page.", insert: "new Worker('')" },
+            { name: "indexedDB.open()", description: "Opens a connection to an IndexedDB database.", insert: "indexedDB.open('')" },
+            { name: "performance.now()", description: "Returns a DOMHighResTimeStamp, measured in milliseconds.", insert: "performance.now()" },
+            { name: "requestAnimationFrame()", description: "Tells the browser that you wish to perform an animation and requests that the browser calls a specified function to update an animation before the next repaint.", insert: "requestAnimationFrame()" },
+            { name: "cancelAnimationFrame()", description: "Cancels an animation frame request previously scheduled with requestAnimationFrame().", insert: "cancelAnimationFrame()" },
+            { name: "MutationObserver", description: "Provides the ability to watch for changes being made to the DOM tree.", insert: "new MutationObserver(() => {})" },
+            { name: "IntersectionObserver", description: "Provides a way to asynchronously observe changes in the intersection of a target element with an ancestor element or with a top-level document's viewport.", insert: "new IntersectionObserver(() => {})" },
+            { name: "ResizeObserver", description: "Reports changes to the dimensions of an Element's content or border box.", insert: "new ResizeObserver(() => {})" },
+            { name: "CustomEvent", description: "Creates a new CustomEvent object.", insert: "new CustomEvent('')" },
+            { name: "dispatchEvent()", description: "Dispatches an Event at the specified EventTarget, invoking the listeners in the appropriate order.", insert: ".dispatchEvent()" },
+            { name: "Object.create()", description: "Creates a new object with the specified prototype object and properties.", insert: "Object.create(null)" },
+            { name: "Object.getPrototypeOf()", description: "Returns the prototype (internal [[Prototype]] property) of the specified object.", insert: "Object.getPrototypeOf()" },
+            { name: "Object.setPrototypeOf()", description: "Sets the prototype (i.e. the internal [[Prototype]] property) of a specified object to another object or null.", insert: "Object.setPrototypeOf(,)" },
+            { name: "Object.is()", description: "Determines whether two values are the same value.", insert: "Object.is(,)" },
+            { name: "Reflect.get()", description: "A static method that works like a property accessor. It provides a way to get a property from an object.", insert: "Reflect.get(, '')" },
+            { name: "Reflect.set()", description: "A static method that works like a property setter. It provides a way to set a property on an object.", insert: "Reflect.set(, '', '')" },
+            { name: "Proxy", description: "Creates a proxy for another object which can intercept and redefine fundamental operations for that object.", insert: "new Proxy({}, {})" },
+            { name: "WeakMap", description: "Allows you to store key/value pairs for which the keys are objects and the values can be arbitrary JavaScript values.", insert: "new WeakMap()" },
+            { name: "WeakSet", description: "Lets you store weakly held objects in a collection.", insert: "new WeakSet()" },
+            { name: "Symbol()", description: "Creates a new unique Symbol value.", insert: "Symbol('')" },
+            { name: "Iterator", description: "An object which defines a sequence and a return value upon its termination.", insert: "for (const item of iterable) {}" },
+            { name: "Generator function", description: "A function that can be exited and re-entered later, retaining its context.", insert: "function* generator() { yield; }" },
+            { name: "Map.prototype.forEach()", description: "Executes a provided function once for each key/value pair in the Map object, in insertion order.", insert: ".forEach(() => {})" },
+            { name: "Set.prototype.forEach()", description: "Executes a provided function once for each value in the Set object, in insertion order.", insert: ".forEach(() => {})" },
+            { name: "globalThis", description: "A global property that contains the global this value, which is usually the window object in browsers.", insert: "globalThis." },
+            { name: "queueMicrotask()", description: "Queues a microtask to be run by the browser's event loop.", insert: "queueMicrotask(() => {})" },
+            { name: "structuredClone()", description: "Creates a deep clone of a given value using the structured clone algorithm.", insert: "structuredClone()" },
+            { name: "isFinite()", description: "Determines whether a number is a finite, legal number.", insert: "isFinite()" },
+            { name: "isNaN()", description: "Determines whether a value is an illegal number (Not-a-Number).", insert: "isNaN()" },
+            { name: "encodeURI()", description: "Encodes a Uniform Resource Identifier (URI) by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.", insert: "encodeURI('')" },
+            { name: "decodeURI()", description: "Decodes a Uniform Resource Identifier (URI) previously created by encodeURI or by a similar routine.", insert: "decodeURI('')" },
+            { name: "escape()", description: "Encodes a string.", insert: "escape('')" },
+            { name: "unescape()", description: "Decodes an encoded string.", insert: "unescape('')" },
+            { name: "eval()", description: "Evaluates JavaScript code represented as a string.", insert: "eval('')" },
+            { name: "isFinite()", description: "Determines whether a number is a finite, legal number.", insert: "isFinite()" },
+            { name: "isNaN()", description: "Determines whether a value is an illegal number (Not-a-Number).", insert: "isNaN()" },
+            { name: "Number()", description: "Converts an object to a number.", insert: "Number('')" },
+            { name: "String()", description: "Converts an object to a string.", insert: "String()" },
+            { name: "Boolean()", description: "Converts an object to a boolean.", insert: "Boolean('')" },
+            { name: "Array()", description: "Creates a new Array object.", insert: "Array()" },
+            { name: "Object()", description: "Creates a new Object object.", insert: "Object()" },
+            { name: "Function()", description: "Creates a new Function object.", insert: "Function('')" },
+            { name: "Promise()", description: "Creates a new Promise object.", insert: "new Promise(() => {})" },
+            { name: "RegExp()", description: "Creates a new RegExp object.", insert: "new RegExp('')" },
+            { name: "Error()", description: "Creates a new Error object.", insert: "new Error('')" },
+            { name: "TypeError()", description: "Creates a new TypeError object.", insert: "new TypeError('')" },
+            { name: "RangeError()", description: "Creates a new RangeError object.", insert: "new RangeError('')" },
+            { name: "ReferenceError()", description: "Creates a new ReferenceError object.", insert: "new ReferenceError('')" },
+            { name: "SyntaxError()", description: "Creates a new SyntaxError object.", insert: "new SyntaxError('')" },
+            { name: "URIError()", description: "Creates a new URIError object.", insert: "new URIError('')" },
+            { name: "decodeURI()", description: "Decodes a Uniform Resource Identifier (URI) previously created by encodeURI or by a similar routine.", insert: "decodeURI('')" },
+            { name: "decodeURIComponent()", description: "Decodes a Uniform Resource Identifier (URI) component previously created by encodeURIComponent or by a similar routine.", insert: "decodeURIComponent('')" },
+            { name: "encodeURI()", description: "Encodes a Uniform Resource Identifier (URI) by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.", insert: "encodeURI('')" },
+            { name: "encodeURIComponent()", description: "Encodes a Uniform Resource Identifier (URI) component by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character.", insert: "encodeURIComponent('')" },
+            { name: "isFinite()", description: "Determines whether a number is a finite, legal number.", insert: "isFinite()" },
+            { name: "isNaN()", description: "Determines whether a value is an illegal number (Not-a-Number).", insert: "isNaN()" },
+            { name: "parseFloat()", description: "Parses a string argument and returns a floating-point number.", insert: "parseFloat()" },
+            { name: "parseInt()", description: "Parses a string argument and returns an integer of the specified radix (the base in mathematical numeral systems).", insert: "parseInt()" },
+            { name: "window.atob()", description: "Decodes a base-64 encoded string.", insert: "window.atob('')" },
+            { name: "window.btoa()", description: "Encodes a string in base-64.", insert: "window.btoa('')" },
+            { name: "window.blur()", description: "Removes focus from the current window.", insert: "window.blur()" },
+            { name: "window.focus()", description: "Sets focus on the current window.", insert: "window.focus()" },
+            { name: "window.find()", description: "Searches for a specified string in the current window.", insert: "window.find('')" },
+            { name: "window.print()", description: "Opens the Print Dialog to print the current document.", insert: "window.print()" },
+            { name: "window.stop()", description: "Stops the loading of the current window.", insert: "window.stop()" },
+            { name: "document.cookie", description: "Sets or returns all cookies in the document.", insert: "document.cookie" },
+            { name: "document.domain", description: "Returns the domain name of the server that loaded the document.", insert: "document.domain" },
+            { name: "document.lastModified", description: "Returns the date and time the document was last modified.", insert: "document.lastModified" },
+            { name: "document.referrer", description: "Returns the URL of the document that loaded the current document.", insert: "document.referrer" },
+            { name: "document.title", description: "Sets or returns the title of the document.", insert: "document.title" },
+            { name: "document.URL", description: "Returns the complete URL of the document.", insert: "document.URL" },
+            { name: "history.length", description: "Returns the number of URLs in the history list.", insert: "history.length" },
+            { name: "navigator.appName", description: "Returns the application name of the browser.", insert: "navigator.appName" },
+            { name: "navigator.appVersion", description: "Returns the version information of the browser.", insert: "navigator.appVersion" },
+            { name: "navigator.cookieEnabled", description: "Returns true if cookies are enabled, otherwise false.", insert: "navigator.cookieEnabled" },
+            { name: "navigator.platform", description: "Returns the browser platform.", insert: "navigator.platform" },
+            { name: "navigator.product", description: "Returns the product name of the browser engine.", insert: "navigator.product" },
+            { name: "navigator.onLine", description: "Returns true if the browser is online, otherwise false.", insert: "navigator.onLine" },
+            { name: "screen.availHeight", description: "Returns the height of the screen, in pixels, minus interface features like the Windows Taskbar.", insert: "screen.availHeight" },
+            { name: "screen.availWidth", description: "Returns the width of the screen, in pixels, minus interface features like the Windows Taskbar.", insert: "screen.availWidth" },
+            { name: "screen.colorDepth", description: "Returns the color depth of the screen.", insert: "screen.colorDepth" },
+            { name: "screen.pixelDepth", description: "Returns the pixel depth of the screen.", insert: "screen.pixelDepth" },
+            { name: "window.closed", description: "Returns a boolean value indicating whether the current window has been closed.", insert: "window.closed" },
+            { name: "window.name", description: "Sets or returns the name of a window.", insert: "window.name" },
+            { name: "window.opener", description: "Returns a reference to the window that created the current window.", insert: "window.opener" },
+            { name: "window.parent", description: "Returns the parent window of the current window.", insert: "window.parent" },
+            { name: "window.self", description: "Returns the current window.", insert: "window.self" },
+            { name: "window.top", description: "Returns the topmost browser window.", insert: "window.top" },
+            { name: "window.length", description: "Returns the number of frames in the current window.", insert: "window.length" },
+            { name: "window.frames", description: "Returns all <iframe> elements in the current window.", insert: "window.frames" },
+            { name: "window.history", description: "Returns the History object for the window.", insert: "window.history" },
+            { name: "window.location", description: "Returns the Location object for the window.", insert: "window.location" },
+            { name: "window.navigator", description: "Returns the Navigator object for the window.", insert: "window.navigator" },
+            { name: "window.screen", description: "Returns the Screen object for the window.", insert: "window.screen" },
+            { name: "window.document", description: "Returns the Document object for the window.", insert: "window.document" },
+            { name: "document.createDocumentFragment()", description: "Creates a new, empty DocumentFragment into which DOM nodes can be added to build an offscreen DOM tree.", insert: "document.createDocumentFragment()" },
+            { name: "document.createRange()", description: "Returns a Range object.", insert: "document.createRange()" },
+            { name: "document.createTreeWalker()", description: "Creates and returns a new TreeWalker object.", insert: "document.createTreeWalker()" },
+            { name: "document.importNode()", description: "Imports a node from another document or external source.", insert: "document.importNode(, true)" },
+            { name: "Node.appendChild()", description: "Adds a node to the end of the list of children of a specified parent node.", insert: ".appendChild()" },
+            { name: "Node.cloneNode()", description: "Creates a copy of a node, and returns the clone.", insert: ".cloneNode(true)" },
+            { name: "Node.hasChildNodes()", description: "Returns a boolean value indicating whether the current node has any child nodes.", insert: ".hasChildNodes()" },
+            { name: "Node.insertBefore()", description: "Inserts a node as a child, right before an existing child.", insert: ".insertBefore(, )" },
+            { name: "Node.removeChild()", description: "Removes a child node from the DOM.", insert: ".removeChild()" },
+            { name: "Node.replaceChild()", description: "Replaces a child node with a new node.", insert: ".replaceChild(, )" },
+            { name: "Element.append()", description: "Inserts a set of Node objects or DOMString objects after the last child of the Element.", insert: ".append('')" },
+            { name: "Element.prepend()", description: "Inserts a set of Node objects or DOMString objects before the first child of the Element.", insert: ".prepend('')" },
+            { name: "Element.after()", description: "Inserts a set of Node objects or DOMString objects after the Element in the children list of its parent.", insert: ".after('')" },
+            { name: "Element.before()", description: "Inserts a set of Node objects or DOMString objects before the Element in the children list of its parent.", insert: ".before('')" },
+            { name: "Element.remove()", description: "Removes the element from the DOM.", insert: ".remove()" },
+            { name: "Element.replaceWith()", description: "Replaces the Element with a set of Node objects or DOMString objects.", insert: ".replaceWith('')" },
+            { name: "element.insertAdjacentHTML()", description: "Parses the specified text as HTML or XML and inserts the resulting nodes into the DOM tree at a specified position.", insert: ".insertAdjacentHTML('', '')" },
+            { name: "element.closest()", description: "Returns the closest ancestor Element which matches the selectors string.", insert: ".closest('')" },
+            { name: "element.matches()", description: "Checks if the Element would be selected by the specified CSS selector string.", insert: ".matches('')" },
+            { name: "element.scrollBy()", description: "Scrolls the element by the specified number of pixels.", insert: ".scrollBy(,)" },
+            { name: "element.scrollTo()", description: "Scrolls the element to a particular set of coordinates inside a given element.", insert: ".scrollTo(,)" },
+            { name: "element.scrollIntoView()", description: "Scrolls the element into the visible area of the browser window.", insert: ".scrollIntoView()" },
+            { name: "JSON.parse()", description: "Parses a JSON string, constructing the JavaScript value or object described by the string.", insert: "JSON.parse()" },
+            { name: "JSON.stringify()", description: "Converts a JavaScript value to a JSON string.", insert: "JSON.stringify()" },
+            { name: "Array.from()", description: "Creates a new, shallow-copied Array instance from an array-like or iterable object.", insert: "Array.from('')" },
+            { name: "Object.values()", description: "Returns an array of a given object's own enumerable property values.", insert: "Object.values()" },
+            { name: "Object.entries()", description: "Returns an array of a given object's own enumerable string-keyed property [key, value] pairs.", insert: "Object.entries()" },
+            { name: "Array.prototype.flat()", description: "Creates a new array with all sub-array elements concatenated into it recursively up to the specified depth.", insert: ".flat()" },
+            { name: "Array.prototype.flatMap()", description: "Returns a new array formed by applying a given callback function to each element of the array, and then flattening the result by one level.", insert: ".flatMap(() => {})" },
+            { name: "String.prototype.padStart()", description: "Pads the current string with another string until the resulting string reaches the given length.", insert: ".padStart(, '')" },
+            { name: "String.prototype.padEnd()", description: "Pads the current string with another string until the resulting string reaches the given length.", insert: ".padEnd(, '')" },
+            { name: "Object.getOwnPropertyDescriptors()", description: "Returns all own property descriptors of a given object.", insert: "Object.getOwnPropertyDescriptors()" },
+            { name: "Object.fromEntries()", description: "Transforms a list of key-value pairs into an object.", insert: "Object.fromEntries()" },
+            { name: "Promise.allSettled()", description: "Returns a promise that fulfills after all of the given promises have either fulfilled or rejected, with an array of objects that each describe the outcome of each promise.", insert: "Promise.allSettled([])" },
+            { name: "Promise.any()", description: "Takes an iterable of Promises and returns a single Promise that resolves with the value of the first Promise in the iterable that resolves.", insert: "Promise.any([])" },
+            { name: "globalThis", description: "A global property that contains the global this value, which is usually the window object in browsers.", insert: "globalThis." },
+            { name: "queueMicrotask()", description: "Queues a microtask to be run by the browser's event loop.", insert: "queueMicrotask(() => {})" },
+            { name: "structuredClone()", description: "Creates a deep clone of a given value using the structured clone algorithm.", insert: "structuredClone()" },
+            { name: "crypto.getRandomValues()", description: "Fills the elements of the provided TypedArray with cryptographically strong random values.", insert: "crypto.getRandomValues()" },
+            { name: "TextEncoder", description: "The TextEncoder interface takes a stream of code points as input and emits a stream of UTF-8 bytes.", insert: "new TextEncoder()" },
+            { name: "TextDecoder", description: "The TextDecoder interface takes a stream of UTF-8 bytes as input and emits a stream of code points.", insert: "new TextDecoder()" },
+            { name: "URL.canParse()", description: "Returns true if the given URL string can be parsed as a valid URL.", insert: "URL.canParse('')" },
+            { name: "URL.prototype.hash", description: "Is a USVString containing a '#' followed by the fragment identifier of the URL.", insert: ".hash" },
+            { name: "URL.prototype.host", description: "Is a USVString containing the domain (host) of the URL.", insert: ".host" },
+            { name: "URL.prototype.hostname", description: "Is a USVString containing the domain (hostname) of the URL.", insert: ".hostname" },
+            { name: "URL.prototype.port", description: "Is a USVString containing the port number of the URL.", insert: ".port" },
+            { name: "URL.prototype.protocol", description: "Is a USVString containing the protocol scheme of the URL.", insert: ".protocol" },
+            { name: "URL.prototype.search", description: "Is a USVString containing a '?' followed by the parameters of the URL.", insert: ".search" },
+            { name: "URL.prototype.pathname", description: "Is a USVString containing an initial '/' followed by the path of the URL.", insert: ".pathname" },
+            { name: "URL.prototype.origin", description: "Returns the origin of the URL.", insert: ".origin" },
+            { name: "console.table()", description: "Displays tabular data as a table.", insert: "console.table()" },
+            { name: "console.count()", description: "Logs the number of times that this particular call to count() has been called.", insert: "console.count('')" },
+            { name: "console.time()", description: "Starts a timer you can use to track how long an operation takes.", insert: "console.time('')" },
+            { name: "console.timeEnd()", description: "Stops a timer that was previously started by calling console.time().", insert: "console.timeEnd('')" },
+            { name: "console.assert()", description: "Logs a message and stack trace to the console if the first argument is false.", insert: "console.assert(, '')" },
+            { name: "console.clear()", description: "Clears the console.", insert: "console.clear()" },
+            { name: "console.dir()", description: "Displays an interactive listing of the properties of a specified JavaScript object.", insert: "console.dir()" },
+            { name: "console.group()", description: "Creates a new inline group in the Web console.", insert: "console.group('')" },
+            { name: "console.groupCollapsed()", description: "Creates a new inline group in the Web console. Unlike console.group(), the new group is initially collapsed.", insert: "console.groupCollapsed('')" },
+            { name: "console.groupEnd()", description: "Closes the most recently opened inline group in the Web console.", insert: "console.groupEnd()" },
+            { name: "performance.measure()", description: "Creates a timestamp in the browser's performance timeline.", insert: "performance.measure('', '', '')" },
+            { name: "performance.getEntriesByType()", description: "Returns a list of PerformanceEntry objects for the given entry type.", insert: "performance.getEntriesByType('')" },
+            { name: "performance.clearMeasures()", description: "Removes all custom performance measures from the browser's performance timeline.", insert: "performance.clearMeasures('')" },
+            { name: "performance.clearMarks()", description: "Removes all custom performance marks from the browser's performance timeline.", insert: "performance.clearMarks('')" },
+            { name: "navigator.clipboard.writeText()", description: "Writes the specified text to the system clipboard.", insert: "navigator.clipboard.writeText('')" },
+            { name: "navigator.clipboard.readText()", description: "Reads text from the system clipboard.", insert: "navigator.clipboard.readText()" },
+            { name: "navigator.geolocation.getCurrentPosition()", description: "Retrieves the current geographic location of the device.", insert: "navigator.geolocation.getCurrentPosition(() => {}, () => {})" },
+            { name: "navigator.mediaDevices.getUserMedia()", description: "Prompts the user for permission to use a media input which produces a MediaStream with tracks containing the requested types of media.", insert: "navigator.mediaDevices.getUserMedia({})" },
+            { name: "CanvasRenderingContext2D.fillRect()", description: "Draws a 'filled' rectangle.", insert: "ctx.fillRect(x, y, width, height)" },
+            { name: "CanvasRenderingContext2D.strokeRect()", description: "Draws a rectangle that is not filled.", insert: "ctx.strokeRect(x, y, width, height)" },
+            { name: "CanvasRenderingContext2D.clearRect()", description: "Clears the specified rectangular area, making it fully transparent.", insert: "ctx.clearRect(x, y, width, height)" },
+            { name: "CanvasRenderingContext2D.beginPath()", description: "Starts a new path by emptying the list of subpaths.", insert: "ctx.beginPath()" },
+            { name: "CanvasRenderingContext2D.moveTo()", description: "Moves the pen to the specified point without drawing a line.", insert: "ctx.moveTo(x, y)" },
+            { name: "CanvasRenderingContext2D.lineTo()", description: "Adds a straight line to the current subpath by connecting the subpath's last point to the specified x and y coordinates.", insert: "ctx.lineTo(x, y)" },
+            { name: "CanvasRenderingContext2D.stroke()", description: "Draws the current path or given path with the current stroke style.", insert: "ctx.stroke()" },
+            { name: "CanvasRenderingContext2D.fill()", description: "Fills the current path or given path with the current fill style.", insert: "ctx.fill()" },
+            { name: "CanvasRenderingContext2D.arc()", description: "Adds a circular arc to the current subpath.", insert: "ctx.arc(x, y, radius, startAngle, endAngle, counterclockwise)" },
+            { name: "CanvasRenderingContext2D.fillText()", description: "Draws (fills) a given text at the given (x,y) positions.", insert: "ctx.fillText('', x, y)" },
+            { name: "CanvasRenderingContext2D.strokeText()", description: "Draws (strokes) a given text at the given (x,y) positions.", insert: "ctx.strokeText('', x, y)" },
+            { name: "CanvasRenderingContext2D.measureText()", description: "Returns a TextMetrics object that contains information about the measured text.", insert: "ctx.measureText('')" },
+            { name: "CanvasRenderingContext2D.drawImage()", description: "Draws an image, canvas, or video onto the canvas.", insert: "ctx.drawImage(image, x, y, width, height)" },
+            { name: "CanvasRenderingContext2D.save()", description: "Saves the current drawing state.", insert: "ctx.save()" },
+            { name: "CanvasRenderingContext2D.restore()", description: "Restores the most recently saved drawing state.", insert: "ctx.restore()" },
+            { name: "CanvasRenderingContext2D.translate()", description: "Adds a translation transformation to the current matrix, and then changes the origin of the canvas.", insert: "ctx.translate(x, y)" },
+            { name: "CanvasRenderingContext2D.rotate()", description: "Adds a rotation transformation to the current matrix.", insert: "ctx.rotate(angle)" },
+            { name: "CanvasRenderingContext2D.scale()", description: "Adds a scaling transformation to the current matrix.", insert: "ctx.scale(x, y)" },
+            { name: "CanvasRenderingContext2D.font", description: "Sets or returns the current font properties for text content.", insert: "ctx.font = ''" },
+            { name: "CanvasRenderingContext2D.fillStyle", description: "Sets or returns the color, gradient, or pattern used to fill shapes.", insert: "ctx.fillStyle = ''" },
+            { name: "CanvasRenderingContext2D.strokeStyle", description: "Sets or returns the color, gradient, or pattern used for strokes.", insert: "ctx.strokeStyle = ''" },
+            { name: "CanvasRenderingContext2D.lineWidth", description: "Sets or returns the current line width.", insert: "ctx.lineWidth = " },
+            { name: "CanvasRenderingContext2D.lineCap", description: "Sets or returns the style of the end caps for a line.", insert: "ctx.lineCap = ''" },
+            { name: "CanvasRenderingContext2D.lineJoin", description: "Sets or returns the type of corner created when two lines meet.", insert: "ctx.lineJoin = ''" },
+            { name: "CanvasRenderingContext2D.shadowBlur", description: "Sets or returns the amount of blur applied to the shadow.", insert: "ctx.shadowBlur = " },
+            { name: "CanvasRenderingContext2D.shadowColor", description: "Sets or returns the color of the shadow.", insert: "ctx.shadowColor = ''" },
+            { name: "CanvasRenderingContext2D.shadowOffsetX", description: "Sets or returns the horizontal distance the shadow will be offset.", insert: "ctx.shadowOffsetX = " },
+            { name: "CanvasRenderingContext2D.shadowOffsetY", description: "Sets or returns the vertical distance the shadow will be offset.", insert: "ctx.shadowOffsetY = " },
+            { name: "CanvasRenderingContext2D.createLinearGradient()", description: "Creates a linear gradient object.", insert: "ctx.createLinearGradient(x0, y0, x1, y1)" },
+            { name: "CanvasRenderingContext2D.createRadialGradient()", description: "Creates a radial gradient object.", insert: "ctx.createRadialGradient(x0, y0, r0, x1, y1, r1)" },
+            { name: "CanvasRenderingContext2D.createPattern()", description: "Creates a pattern using the specified image and repetition.", insert: "ctx.createPattern(, '')" },
+            { name: "CanvasRenderingContext2D.addColorStop()", description: "Adds a new stop to a gradient object.", insert: ".addColorStop(, '')" },
+            { name: "ImageData.data", description: "A Uint8ClampedArray representing a one-dimensional array containing the data in the RGBA order, with integer values between 0 and 255 (inclusive).", insert: "imageData.data" },
+            { name: "ImageData.height", description: "The height of the ImageData in pixels.", insert: "imageData.height" },
+            { name: "ImageData.width", description: "The width of the ImageData in pixels.", insert: "imageData.width" },
+            { name: "URL.createObjectURL()", description: "Creates a DOMString containing a URL representing the object given in the parameter.", insert: "URL.createObjectURL()" },
+            { name: "URL.revokeObjectURL()", description: "Revokes a URL created with URL.createObjectURL().", insert: "URL.revokeObjectURL()" },
+            { name: "FileReader.prototype.readAsArrayBuffer()", description: "Starts reading the contents of the specified Blob or File. When the read operation is finished, the readyState becomes DONE, and the loadend is triggered. At that time, the result attribute contains an ArrayBuffer representing the file's raw data.", insert: "reader.readAsArrayBuffer()" },
+            { name: "FileReader.prototype.readAsBinaryString()", description: "Starts reading the contents of the specified Blob or File. When the read operation is finished, the readyState becomes DONE, and the loadend is triggered. At that time, the result attribute contains the raw binary data from the file as a string.", insert: "reader.readAsBinaryString()" },
+            { name: "FileReader.prototype.readAsText()", description: "Starts reading the contents of the specified Blob or File. When the read operation is finished, the readyState becomes DONE, and the loadend is triggered. At that time, the result attribute contains the contents of the file as a text string.", insert: "reader.readAsText('')" },
+            { name: "FileReader.prototype.readAsDataURL()", description: "Starts reading the contents of the specified Blob or File. When the read operation is finished, the readyState becomes DONE, and the loadend is triggered. At that time, the result attribute contains a data: URL representing the file's data as a base64 encoded string.", insert: "reader.readAsDataURL()" },
+            { name: "FormData", description: "Provides a way to easily construct a set of key/value pairs representing form fields and their values, which can then be easily sent using the XMLHttpRequest.send() method.", insert: "new FormData()" },
+            { name: "FormData.append()", description: "Appends a new value onto an existing key inside a FormData object, or adds the key if it does not already exist.", insert: "formData.append('', '')" },
+            { name: "FormData.delete()", description: "Deletes a key/value pair from a FormData object.", insert: "formData.delete('')" },
+            { name: "FormData.get()", description: "Returns the first value associated with a given key from within a FormData object.", insert: "formData.get('')" },
+            { name: "FormData.getAll()", description: "Returns an array of all the values associated with a given key from within a FormData object.", insert: "formData.getAll('')" },
+            { name: "FormData.has()", description: "Returns a boolean value indicating whether a FormData object contains a certain key.", insert: "formData.has('')" },
+            { name: "FormData.set()", description: "Sets a new value for an existing key inside a FormData object, or adds the key if it does not already exist.", insert: "formData.set('', '')" }
+        ];
+
+        let uploadedImageDataURLs = [];
+        let uploadedImageNames = []; // Store original file names
+        let imageCount = 0;
+        let selectedImageIndex = -1; // To track the currently selected image
+
+        const uploadedImagePreviewContainer = document.getElementById('uploaded-image-preview-container');
+        const imageShortcutsContainer = document.getElementById('image-shortcuts');
+        const imagePreviewModal = document.getElementById('image-preview-modal');
+        const imagePreviewElement = imagePreviewModal.querySelector('img');
+
+        function updateLineNumbers() {
+            const txtArea = document.getElementById('txt');
+            const lineNumbersDiv = document.getElementById('line-numbers');
+            const lines = txtArea.value.split('\n').length;
+            lineNumbersDiv.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br/>');
+        }
+
+        function showSuggestions(event) {
+            const txtArea = document.getElementById('txt');
+            const input = txtArea.value;
+            const cursorPosition = txtArea.selectionStart;
+            const textBeforeCursor = input.substring(0, cursorPosition);
+            const suggestionsDiv = document.getElementById('suggestions');
+            suggestionsDiv.innerHTML = '';
+            suggestionsDiv.style.display = 'none';
+
+            // HTML Tag Suggestions
+            const lastTagMatch = textBeforeCursor.match(/<([a-zA-Z]*)$/);
+            if (lastTagMatch) {
+                const tagName = lastTagMatch[1].toLowerCase();
+                const filteredSuggestions = Object.keys(tagPairs).filter(tag => tag.startsWith(tagName));
+                if (filteredSuggestions.length > 0) {
+                    filteredSuggestions.forEach(tag => {
+                        const div = document.createElement('div');
+                        div.textContent = `<${tag}>`;
+                        div.onclick = () => selectTagSuggestion(tag, lastTagMatch[0]);
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                    return; // Prevent JS suggestions if an HTML tag is being typed
+                }
+            }
+
+            // JavaScript Function Suggestions
+            showJsSuggestions(textBeforeCursor, cursorPosition);
+        }
+
+        function showJsSuggestions(textBeforeCursor, cursorPosition) {
+            const suggestionsDiv = document.getElementById('suggestions');
+            suggestionsDiv.innerHTML = ''; // Clear previous suggestions
+
+            // Get the last word or partial word before the cursor
+            const wordMatch = textBeforeCursor.match(/[\w\d\.]*$/);
+            const partialWord = wordMatch ? wordMatch[0].toLowerCase() : '';
+
+            if (partialWord.length > 0) {
+                const filteredJsSuggestions = jsFunctionsSuggestions.filter(func =>
+                    func.name.toLowerCase().includes(partialWord)
+                );
+
+                if (filteredJsSuggestions.length > 0) {
+                    filteredJsSuggestions.forEach(func => {
+                        const div = document.createElement('div');
+                        div.innerHTML = `<strong>${func.name}</strong> - ${func.description}`;
+                        div.onclick = () => selectJsSuggestion(func, partialWord.length);
+                        suggestionsDiv.appendChild(div);
+                    });
+                    suggestionsDiv.style.display = 'block';
+                }
+            }
+        }
+
+        function selectTagSuggestion(tag, lastTag) {
+            const txtArea = document.getElementById('txt');
+            const input = txtArea.value;
+            const cursorPosition = txtArea.selectionStart;
+            const newValue = input.slice(0, cursorPosition - lastTag.length) + `<${tag}>` + input.slice(cursorPosition);
+            txtArea.value = newValue;
+            updateLineNumbers();
+            document.getElementById('suggestions').style.display = 'none';
+            txtArea.focus();
+            txtArea.selectionStart = cursorPosition - lastTag.length + `<${tag}>`.length;
+            txtArea.selectionEnd = cursorPosition - lastTag.length + `<${tag}>`.length;
+        }
+
+        function selectJsSuggestion(suggestion, charsToRemove) {
+            const txtArea = document.getElementById('txt');
+            const currentText = txtArea.value;
+            const cursorPosition = txtArea.selectionStart;
+
+            // Remove the partial word typed by the user
+            const textBeforeInsertion = currentText.substring(0, cursorPosition - charsToRemove);
+            const textAfterInsertion = currentText.substring(cursorPosition);
+
+            txtArea.value = textBeforeInsertion + suggestion.insert + textAfterInsertion;
+
+            // Place cursor inside the parentheses for functions that expect arguments
+            let newCursorPosition = textBeforeInsertion.length + suggestion.insert.length;
+            if (suggestion.insert.includes('()') || suggestion.insert.includes('({})') || suggestion.insert.includes('([])') || suggestion.insert.includes("('')") || suggestion.insert.includes("('', '')") || suggestion.insert.includes("(() => {})") || suggestion.insert.includes("({}, {})") || suggestion.insert.includes("(,)") || suggestion.insert.includes("(, ,)") || suggestion.insert.includes("((), ())")) {
+                newCursorPosition = textBeforeInsertion.length + suggestion.insert.indexOf('(') + 1;
+            }
+
+            txtArea.selectionStart = newCursorPosition;
+            txtArea.selectionEnd = newCursorPosition;
+
+            updateLineNumbers();
+            document.getElementById('suggestions').style.display = 'none';
+            txtArea.focus();
+        }
+
+
+        function generateClosingTag() {
+            const textarea = document.getElementById('txt');
+            const input = textarea.value.trim();
+            const tagMatch = input.match(/<(\w+)>$/);
+            if (tagMatch) {
+                const tagName = tagMatch[1];
+                // Check if it's a self-closing tag
+                if (tagPairs[tagName] === null) {
+                    return; // Do not generate closing tag for self-closing tags
+                }
+                const closingTag = `</${tagName}>`;
+                textarea.value = input + closingTag + '\n';
+            }
+        }
+
+        document.getElementById('txt').addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                const txtArea = document.getElementById('txt');
+                const cursorPosition = txtArea.selectionStart;
+                const textBeforeCursor = txtArea.value.substring(0, cursorPosition);
+
+                // Check for HTML structure shortcut
+                if (textBeforeCursor.endsWith('#!')) {
+                    event.preventDefault();
+                    const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+</body>
+</html>`;
+                    txtArea.value = textBeforeCursor.slice(0, textBeforeCursor.length - 2) + htmlTemplate;
+                    txtArea.selectionStart = txtArea.selectionEnd = textBeforeCursor.length - 2 + htmlTemplate.length;
+                    updateLineNumbers();
+                    return;
+                }
+
+                // Check for auto-closing tags on Enter if a tag was just closed with '>'
+                const lastChar = textBeforeCursor.slice(-1);
+                const secondLastChar = textBeforeCursor.slice(-2, -1);
+                if (lastChar === '>' && secondLastChar !== '/') { // Ensure it's not a self-closing tag like <img/>
+                    const openTagMatch = textBeforeCursor.match(/<([a-zA-Z]+)>$/);
+                    if (openTagMatch) {
+                        const tagName = openTagMatch[1];
+                        if (tagPairs[tagName] !== null) { // Only auto-close if not a self-closing tag
+                            event.preventDefault();
+                            const closingTag = `</${tagName}>`;
+                            const newText = txtArea.value.substring(0, cursorPosition) + closingTag + '\n' + txtArea.value.substring(cursorPosition);
+                            txtArea.value = newText;
+                            txtArea.selectionStart = txtArea.selectionEnd = cursorPosition; // Keep cursor after the new line
+                            updateLineNumbers();
+                            return;
+                        }
+                    }
+                }
+
+                // Default Enter behavior: new line
+                const start = txtArea.selectionStart;
+                const end = txtArea.selectionEnd;
+                txtArea.value = txtArea.value.substring(0, start) + '\n' + txtArea.value.substring(end);
+                txtArea.selectionStart = txtArea.selectionEnd = start + 1;
+                event.preventDefault(); // Prevent default Enter key behavior
+            }
+            updateLineNumbers();
+        });
+
+
+        function handleKeyDown(event) {
+            const txtArea = document.getElementById('txt');
+            const input = txtArea.value;
+
+            // Call showSuggestions on every key down to ensure suggestions are updated
+            // It's already called on 'input' event, but for specific key handling like Enter,
+            // it's good to re-evaluate. However, for general typing, 'oninput' is sufficient.
+            // Keeping this here for now, but be aware of potential redundant calls.
+            showSuggestions(event);
+        }
+
+        function run() {
+            const inputText = document.getElementById("txt").value;
+            const iframe = document.getElementById("iframe-output");
+            let processedHTML = inputText;
+
+            for (let i = 0; i < uploadedImageDataURLs.length; i++) {
+                const code = `[image${i + 1}]`;
+                const dataURL = uploadedImageDataURLs[i];
+                processedHTML = processedHTML.replaceAll(code, `<img src="${dataURL}" style="max-width: 100%;">`);
+            }
+
+            if (selectedImageIndex !== -1 && uploadedImageDataURLs[selectedImageIndex]) {
+                processedHTML = processedHTML.replaceAll('[selected-image]', uploadedImageDataURLs[selectedImageIndex]);
+            } else {
+                processedHTML = processedHTML.replaceAll('[selected-image]', ''); // Replace if no image selected
+            }
+
+            iframe.srcdoc = processedHTML;
+        }
+
+        function download() {
+            let text = document.getElementById("txt").value;
+            const filename = "index.html";
+
+            // Create a mapping of shortcuts to filenames
+            const imageFilenameMap = {};
+            for (let i = 0; i < uploadedImageNames.length; i++) {
+                const shortcut = `[image${i + 1}]`;
+                imageFilenameMap[shortcut] = uploadedImageNames[i];
+            }
+
+            // Replace the shortcuts in the text with filenames
+            for (const shortcut in imageFilenameMap) {
+                const filenameToReplace = imageFilenameMap[shortcut];
+                // Use a regular expression to replace all occurrences of the shortcut
+                const regex = new RegExp(shortcut.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g');
+                text = text.replace(regex, filenameToReplace);
+            }
+
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
+        function loadFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('txt').value = e.target.result;
+                    updateLineNumbers();
+                }
+                reader.readAsText(file);
+            }
+        }
+
+        function uploadImages(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const reader = new FileReader();
+                reader.onloadend = function () {
+                    const dataURL = reader.result;
+                    uploadedImageDataURLs.push(dataURL);
+                    uploadedImageNames.push(file.name); // Store the file name
+                    imageCount++;
+                    addImagePreview(dataURL, uploadedImageDataURLs.length - 1);
+                    addImageShortcut(`[image${uploadedImageDataURLs.length}]`);
+                }
+                if (file) {
+                    reader.readAsDataURL(file);
+                }
+            }
+        }
+
+        function addImagePreview(dataURL, index) {
+            const img = document.createElement('img');
+            img.src = dataURL;
+            img.classList.add('uploaded-image-preview');
+            img.addEventListener('click', () => {
+                // Deselect previous selection
+                const selected = document.querySelector('.uploaded-image-preview.selected');
+                if (selected) {
+                    selected.classList.remove('selected');
+                }
+                img.classList.add('selected');
+                selectedImageIndex = index;
+            });
+            uploadedImagePreviewContainer.appendChild(img);
+        }
+
+        function addImageShortcut(shortcut) {
+            const shortcutDiv = document.createElement('div');
+            shortcutDiv.classList.add('image-shortcut');
+            shortcutDiv.textContent = shortcut;
+            shortcutDiv.addEventListener('click', () => {
+                const currentText = document.getElementById('txt').value;
+                const cursorPosition = document.getElementById('txt').selectionStart;
+                const newText = currentText.substring(0, cursorPosition) + shortcut + currentText.substring(document.getElementById('txt').selectionEnd);
+                document.getElementById('txt').value = newText;
+                document.getElementById('txt').selectionStart = cursorPosition + shortcut.length;
+                document.getElementById('txt').selectionEnd = cursorPosition + shortcut.length;
+                document.getElementById('txt').focus();
+            });
+
+            const previewLink = document.createElement('span');
+            previewLink.textContent = ' (Preview)';
+            previewLink.style.cursor = 'pointer';
+            previewLink.style.marginLeft = '5px';
+            previewLink.addEventListener('click', (event) => {
+                event.stopPropagation(); // Prevent shortcut click
+                imagePreviewElement.src = uploadedImageDataURLs[parseInt(shortcut.replace('[image', '').replace(']', '')) - 1];
+                imagePreviewModal.style.display = 'flex';
+            });
+            shortcutDiv.appendChild(previewLink);
+
+            imageShortcutsContainer.appendChild(shortcutDiv);
+        }
+
+        imagePreviewModal.addEventListener('click', (event) => {
+            if (event.target === imagePreviewModal) {
+                imagePreviewModal.style.display = 'none';
+            }
+        });
+
+        function downloadCompiler() {
+            const htmlContent = document.documentElement.outerHTML;
+            const filename = "offline_html_compiler.html";
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        updateLineNumbers();
+
+        const colorInput = document.getElementById('colorInput');
+        const selectedColorDiv = document.getElementById('selectedColor');
+        const colorCodeDiv = document.getElementById('colorCode');
+        const textarea = document.getElementById('txt');
+        let lastCursorPosition = 0;
+
+        function updateColorDisplay(color) {
+            selectedColorDiv.style.backgroundColor = color;
+            colorCodeDiv.textContent = color;
+        }
+
+        function insertColorCode(color) {
+            const startPos = lastCursorPosition;
+            const endPos = lastCursorPosition;
+            const textBefore = textarea.value.substring(0, startPos);
+            const textAfter = textarea.value.substring(endPos, textarea.value.length);
+
+            textarea.value = textBefore + color + textAfter;
+
+            // Update cursor position after insertion
+            textarea.selectionStart = startPos + color.length;
+            textarea.selectionEnd = startPos + color.length;
+
+            // Optionally, update the selected color display
+            updateColorDisplay(color);
+            textarea.focus(); // Keep focus on the textarea
+        }
+
+        colorInput.addEventListener('input', (event) => {
+            updateColorDisplay(event.target.value);
+            insertColorCode(event.target.value);
+        });
+
+        textarea.addEventListener('click', (event) => {
+            lastCursorPosition = textarea.selectionStart;
+        });
+
+        textarea.addEventListener('keyup', (event) => {
+            lastCursorPosition = textarea.selectionStart;
+        });
+
+        // Initialize with the default color
+        updateColorDisplay(colorInput.value);
+
+        const helpDiv = document.getElementById("help-div");
+        const helpButtonElement = document.getElementById('help-button');
+        const closeHelpButton = helpDiv.querySelector('button');
+
+        function toggleHelp() {
+            helpDiv.style.display = helpDiv.style.display === "block" ? "none" : "block";
+        }
+
+        if (closeHelpButton) closeHelpButton.onclick = toggleHelp;
+
+
+        // New JavaScript for Creator's Functions
+
+        // Base data for Creator's Functions
+        const baseCreatorFunctions = [
+            {
+                name: "rotateColors",
+                feature: "Cycles through an array of colors and applies them to an array of HTML elements. Use for dynamic color changes, rotating elements.",
+                definition: `function rotateColors(elementsArray, colorsArray) {
+        // Ensure both arrays have elements
+        if (elementsArray.length === 0 || colorsArray.length === 0) {
+            console.warn("rotateColors: Elements or colors array is empty.");
+            return;
+        }
+
+        // Rotate the colorsArray: Move the first color to the end
+        const firstColor = colorsArray.shift(); // Removes the first element and returns it
+        colorsArray.push(firstColor); // Adds it to the end
+
+        // Apply the rotated colors to the elements
+        // Using a for loop to iterate over any number of elements
+        for (let i = 0; i < elementsArray.length; i++) {
+            if (elementsArray[i] && colorsArray[i]) { // Basic check if element and color exist
+                elementsArray[i].style.backgroundColor = colorsArray[i];
+            }
+        }
+    }`
+            },
+            // You can add more predefined functions here
+            { name: "MyFunction1", feature: "Performs data validation on input fields.", definition: "// Add definition for MyFunction1 here" },
+            { name: "CalculateTotal", feature: "Calculates the sum of items in a shopping cart.", definition: "// Add definition for CalculateTotal here" },
+            { name: "AnimateElement", feature: "Adds a fading animation to a DOM element.", definition: "// Add definition for AnimateElement here" },
+            { name: "SaveUserSettings", feature: "Persists user preferences to local storage.", definition: "// Add definition for SaveUserSettings here" },
+            { name: "FormatDate", feature: "Converts a date object to a 'YYYY-MM-DD' string.", definition: "// Add definition for FormatDate here" },
+            { name: "ValidateEmail", feature: "Checks if a given string is a valid email format.", definition: "// Add definition for ValidateEmail here" },
+            { name: "LoadDataFromAPI", feature: "Fetches data from a specified REST API endpoint.", definition: "// Add definition for LoadDataFromAPI here" },
+            { name: "GenerateReport", feature: "Compiles and formats data into a printable report.", definition: "// Add definition for GenerateReport here" },
+            { name: "ToggleVisibility", feature: "Hides or shows a specified HTML element.", definition: "// Add definition for ToggleVisibility here" }
+        ];
+
+        // This array will hold both base and user-added functions
+        let creatorFunctionsData = [];
+
+        const creatorFunctionsDiv = document.getElementById('creator-functions-div');
+        const creatorFunctionsSearchInput = document.getElementById('creator-functions-search');
+        const creatorFunctionsList = document.getElementById('creator-functions-list');
+
+        // Modal elements
+        const addFunctionModal = document.getElementById('add-function-modal');
+        const addFunctionBackdrop = document.getElementById('add-function-backdrop');
+        const functionNameInput = document.getElementById('function-name-input');
+        const functionFeatureInput = document.getElementById('function-feature-input');
+        const functionDefinitionTextarea = document.getElementById('function-definition-textarea');
+
+
+        function loadFunctionsFromLocalStorage() {
+            // Start with base functions
+            creatorFunctionsData = [...baseCreatorFunctions];
+
+            const storedFunctions = localStorage.getItem('customCreatorFunctions');
+            if (storedFunctions) {
+                try {
+                    const customFunctions = JSON.parse(storedFunctions);
+                    // Add custom functions, ensuring no duplicates if a base function was somehow stored as custom
+                    customFunctions.forEach(customFunc => {
+                        if (!creatorFunctionsData.some(f => f.name === customFunc.name)) {
+                            creatorFunctionsData.push(customFunc);
+                        }
+                    });
+                } catch (e) {
+                    console.error("Error parsing custom functions from localStorage:", e);
+                    localStorage.removeItem('customCreatorFunctions'); // Clear corrupted data
+                }
+            }
+            renderCreatorFunctions(creatorFunctionsData); // Render all functions on load
+        }
+
+        function saveFunctionsToLocalStorage() {
+            // Filter out base functions before saving to avoid redundancy,
+            // or if you want to allow users to modify base functions and persist them,
+            // you'd save the entire `creatorFunctionsData` directly.
+            // For now, let's just save the custom ones.
+            const customFunctionsToSave = creatorFunctionsData.filter(func => !baseCreatorFunctions.some(baseFunc => baseFunc.name === func.name));
+            localStorage.setItem('customCreatorFunctions', JSON.stringify(customFunctionsToSave));
+        }
+
+        function toggleCreatorFunctions() {
+            creatorFunctionsDiv.style.display = creatorFunctionsDiv.style.display === "block" ? "none" : "block";
+            // Populate the list when shown
+            if (creatorFunctionsDiv.style.display === "block") {
+                renderCreatorFunctions(creatorFunctionsData); // Render all current functions
+                creatorFunctionsSearchInput.value = ''; // Clear search when opening
+                creatorFunctionsSearchInput.focus(); // Focus on search bar
+            }
+        }
+
+        function renderCreatorFunctions(functionsToDisplay) {
+            creatorFunctionsList.innerHTML = ''; // Clear previous list
+            if (functionsToDisplay.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No functions found matching your search.';
+                creatorFunctionsList.appendChild(li);
+                return;
+            }
+
+            functionsToDisplay.forEach(func => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${func.name}:</strong> ${func.feature}`;
+                // Add click behavior to insert function definition into the editor
+                li.addEventListener('click', () => {
+                    const txtArea = document.getElementById('txt');
+                    const currentText = txtArea.value;
+                    const cursorPosition = lastCursorPosition; // Use the stored last cursor position
+                    // Add a newline for better formatting when inserting
+                    const newText = currentText.substring(0, cursorPosition) + func.definition + "\n" + currentText.substring(cursorPosition);
+                    txtArea.value = newText;
+                    // Move cursor to the end of the inserted definition
+                    txtArea.selectionStart = cursorPosition + func.definition.length + 1; // +1 for the new line
+                    txtArea.selectionEnd = cursorPosition + func.definition.length + 1;
+                    txtArea.focus();
+                    updateLineNumbers(); // Update line numbers after inserting code
+                    toggleCreatorFunctions(); // Close the div after selection
+                });
+                creatorFunctionsList.appendChild(li);
+            });
+        }
+
+        function searchCreatorFunctions() {
+            const searchTerm = creatorFunctionsSearchInput.value.toLowerCase();
+            const filteredFunctions = creatorFunctionsData.filter(func =>
+                func.name.toLowerCase().includes(searchTerm) ||
+                func.feature.toLowerCase().includes(searchTerm)
+            );
+            renderCreatorFunctions(filteredFunctions);
+        }
+
+        // Functions for the Add New Function Modal
+        function showAddFunctionModal() {
+            addFunctionModal.style.display = 'flex';
+            addFunctionBackdrop.style.display = 'flex';
+            functionNameInput.focus(); // Focus on the first input
+        }
+
+        function hideAddFunctionModal() {
+            addFunctionModal.style.display = 'none';
+            addFunctionBackdrop.style.display = 'none';
+            // Clear inputs when closing
+            functionNameInput.value = '';
+            functionFeatureInput.value = '';
+            functionDefinitionTextarea.value = '';
+        }
+
+        function addCustomFunction() {
+            const name = functionNameInput.value.trim();
+            const feature = functionFeatureInput.value.trim();
+            const definition = functionDefinitionTextarea.value.trim();
+
+            if (!name || !definition) {
+                alert("Function Name and Definition are required!");
+                return;
+            }
+
+            // Check if a function with this name already exists
+            if (creatorFunctionsData.some(func => func.name === name)) {
+                alert(`A function named "${name}" already exists. Please use a unique name.`);
+                return;
+            }
+
+            const newFunction = {
+                name: name,
+                feature: feature || "User-defined function.", // Default feature if not provided
+                definition: definition
+            };
+
+            creatorFunctionsData.push(newFunction);
+            saveFunctionsToLocalStorage(); // Save to localStorage
+            renderCreatorFunctions(creatorFunctionsData); // Re-render the list
+            hideAddFunctionModal(); // Close the modal
+            alert(`Function "${name}" added successfully! It will be available next time you open this compiler in this browser.`);
+        }
+
+
+
+    // Existing JavaScript code above...
+
+    // --- Start of new CSS Suggestion Code ---
+
+  // Get a reference to the textarea element where CSS might be entered.
+    // IMPORTANT: If your CSS input area has a different ID or is accessed differently,
+    // you MUST change 'functionDefinitionTextarea' to the correct ID or variable name.
+    const cssInputArea = document.getElementById('functionDefinitionTextarea') || document.querySelector('textarea');
+
+    if (cssInputArea) {
+        const cssSuggestions = [
+            // Flexbox and Display
+            "display: flex;", "display: inline-flex;", "display: block;", "display: inline;", "display: grid;",
+            "flex-direction: row;", "flex-direction: column;", "flex-wrap: wrap;", "justify-content: center;",
+            "justify-content: space-between;", "align-items: center;", "align-content: center;", "flex-grow: 1;",
+            "flex-shrink: 1;", "flex-basis: auto;", "order: 0;", "gap: 10px;",
+
+            // Backgrounds
+            "background-image: url('');", "background-color: #f0f0f0;", "background-size: cover;",
+            "background-repeat: no-repeat;", "background-position: center;", "background: #f0f0f0 url('') no-repeat center / cover;",
+
+            // Padding and Margin
+            "padding: 10px;", "padding-top: 10px;", "padding-right: 10px;", "padding-bottom: 10px;", "padding-left: 10px;",
+            "margin: 10px auto;", "margin-top: 10px;", "margin-right: 10px;", "margin-bottom: 10px;", "margin-left: 10px;",
+
+            // Borders
+            "border: 1px solid #ccc;", "border-top: 1px solid #ccc;", "border-right: 1px solid #ccc;",
+            "border-bottom: 1px solid #ccc;", "border-left: 1px solid #ccc;", "border-radius: 5px;",
+            "border-top-left-radius: 5px;", "border-bottom-right-radius: 5px;", "border-collapse: collapse;",
+
+            // Positioning and Floats
+            "position: relative;", "position: absolute;", "position: fixed;", "top: 0;", "left: 0;", "right: 0;", "bottom: 0;",
+            "float: left;", "float: right;", "clear: both;",
+
+            // Typography
+            "font-family: Arial, sans-serif;", "font-size: 16px;", "font-weight: bold;", "color: #333;",
+            "text-align: center;", "line-height: 1.5;", "text-decoration: none;", "text-transform: uppercase;",
+
+            // Box Model and Sizing
+            "width: 100%;", "height: auto;", "max-width: 800px;", "min-height: 100px;", "box-sizing: border-box;",
+            "overflow: auto;", "overflow-x: hidden;", "overflow-y: scroll;", "scroll-behavior: smooth;",
+
+            // Z-index and Opacity
+            "z-index: 1;", "opacity: 0.8;",
+
+            // Transitions and Transforms
+            "transition: all 0.3s ease-in-out;", "transform: translateX(10px);", "transform: rotate(45deg);",
+            "transform: scale(1.1);", "transform-origin: center center;", "perspective: 1000px;",
+            "perspective-origin: center center;", "backface-visibility: hidden;",
+
+            // Cursors
+            "cursor: pointer;", "cursor: default;",
+
+            // Outline
+            "outline: none;",
+
+            // List styles
+            "list-style-type: none;", "list-style-position: inside;",
+
+            // Grid
+            "grid-template-columns: 1fr 1fr;", "grid-template-rows: auto;", "grid-gap: 10px;",
+            "grid-column: 1 / 3;", "grid-row: 1;", "grid-area: header;",
+
+            // Other common properties (50+ suggestions included)
+            "box-shadow: 2px 2px 5px rgba(0,0,0,0.2);", "text-shadow: 1px 1px 2px rgba(0,0,0,0.1);",
+            "visibility: hidden;", "clip: rect(0,0,0,0);", "resize: vertical;",
+            "content: '';", "quotes: '';", "caption-side: top;", "empty-cells: show;",
+            "table-layout: fixed;", "direction: ltr;", "unicode-bidi: normal;", "columns: 2;",
+            "column-gap: 20px;", "column-rule: 1px solid #ccc;", "tab-size: 4;", "word-break: break-all;",
+            "white-space: normal;", "text-overflow: ellipsis;", "hyphens: auto;", "writing-mode: horizontal-tb;",
+            "appearance: none;", "pointer-events: none;", "touch-action: auto;", "will-change: transform;",
+            "filter: blur(5px);", "backdrop-filter: blur(5px);", "mask-image: url('');",
+            "mask-mode: alpha;", "object-fit: cover;", "object-position: center;",
+            "isolation: isolate;", "mix-blend-mode: multiply;", "background-blend-mode: multiply;",
+            "image-rendering: auto;", "font-variant-numeric: tabular-nums;",
+            "font-feature-settings: 'liga';", "font-variation-settings: 'wght' 400;",
+            "scroll-snap-type: y mandatory;", "scroll-snap-align: start;",
+            "overscroll-behavior: auto;", "contain: layout;", "contain: strict;",
+            "clip-path: circle(50%);", "shape-outside: circle();", "user-select: none;", "outline-offset: 2px;",
+            "transform-style: preserve-3d;", "backface-visibility: hidden;", "perspective: 1000px;",
+            "pointer-events: none;", "touch-action: manipulation;", "caret-color: auto;", "filter: grayscale(100%);",
+            "mask-composite: add;", "background-attachment: fixed;", "border-image: url('') 30 fill;",
+            "font-variant: small-caps;", "text-indent: 50px;", "vertical-align: middle;",
+            "white-space: nowrap;", "word-wrap: break-word;", "resize: both;", "outline-color: blue;"
+        ];
+
+        cssInputArea.addEventListener('input', (event) => {
+            const currentInput = event.target.value;
+            // Get the last "word" or partial property being typed
+            const lastWordMatch = currentInput.match(/([a-zA-Z-]+)\s*$/);
+            const lastWord = lastWordMatch ? lastWordMatch[1].toLowerCase() : '';
+
+            if (lastWord.length > 0) {
+                const suggestions = cssSuggestions.filter(suggestion =>
+                    suggestion.toLowerCase().startsWith(lastWord)
+                );
+
+                if (suggestions.length > 0) {
+                    // For a real-time compiler, you would display these suggestions in a UI element
+                    // like a dropdown list, usually positioned near the cursor.
+                    // For now, these suggestions are available in the 'suggestions' array.
+                    // You can log them to the console for testing:
+                    console.log('CSS Suggestions:', suggestions);
+
+                    // Example: If you want to automatically complete the first suggestion (use with caution)
+                    // const firstSuggestion = suggestions[0];
+                    // if (firstSuggestion.startsWith(lastWord) && firstSuggestion !== currentInput) {
+                    //     // This part needs more sophisticated handling for actual autocomplete
+                    //     // For now, it's just a demonstration of finding suggestions.
+                    // }
+                }
+            }
+        });
+
+        // If you want to add functionality to insert a suggestion, you would typically
+        // have a UI (e.g., a clickable list of suggestions) that calls a function like this:
+        /*
+        function insertSuggestion(suggestion) {
+            const start = cssInputArea.selectionStart;
+            const end = cssInputArea.selectionEnd;
+            const text = cssInputArea.value;
+            const newText = text.substring(0, start - lastWord.length) + suggestion + text.substring(end);
+            cssInputArea.value = newText;
+            cssInputArea.setSelectionRange(start + suggestion.length - lastWord.length, start + suggestion.length - lastWord.length);
+        }
+        */
+    }
+    // --- End of new CSS Suggestion Code ---
+
+    // Initial load of functions when the DOM content is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+        loadFunctionsFromLocalStorage();
+    });
+</script>
+
+
+
+</body>
+
+</html>
