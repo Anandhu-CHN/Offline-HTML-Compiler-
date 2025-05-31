@@ -146,6 +146,20 @@ display: none;
  background-color:#30e3c8;
       color:#d936a8;
      }
+
+
+     #countdown {
+    font-size: 3em;
+    color: #FF0000;
+    font-weight: bold;
+     }
+
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 50px;
+}
+     
     </style>
 </head>
 <body>
@@ -175,6 +189,15 @@ display: none;
         <button onclick="toggleHelp()">Close</button>
     </div>
 
+<div id="Redirecting div">
+
+<h1>Redirecting you in:</h1>
+  <p><span id="countdown">6</span> seconds</p>
+
+ 
+</div>
+
+ 
     <br>
   <input type="color" id="colorInput" value="#ff0000">
   <div id="selectedColor" style="background-color: rgb(255, 0, 0);"></div>
@@ -466,6 +489,33 @@ txtArea.value = input.slice(0, input.length - 2) + htmlTemplate;
         if (closeHelpButton) closeHelpButton.onclick = toggleHelp;
 
 
+
+//######№###############*************"""""
+// Redirecting part.........
+ var count = 6; // Initial countdown value
+    var redirectURL = "New_Compiler.html"; // The URL to redirect to
+
+    // Function to update the countdown display
+    function updateCountdown() {
+      document.getElementById("countdown").textContent = count;
+      count--; // Decrement the count
+
+      // If the countdown reaches 0, redirect
+      if (count < 0) {
+        window.location.replace(redirectURL); // Using replace() for a clean redirect
+      } else {
+        // Otherwise, call this function again after 1 second
+        setTimeout(updateCountdown, 1000);
+      }
+    }
+
+    // Start the countdown when the page loads
+    window.onload = function() {
+      updateCountdown();
+    };
+ 
+
+ 
 </script>
 
 </body>
