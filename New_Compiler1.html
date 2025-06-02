@@ -41,7 +41,7 @@
         }
 
         #line-numbers {
-            padding: 15px;
+            padding: 8px;
             background-color: #2d3436;
             color: #dfe6e9;
             text-align: right;
@@ -770,9 +770,20 @@
             <button class="cancel" onclick="hideAddFunctionModal()">Cancel</button>
         </div>
     </div>
-<footer>created by anandhu-chn 2025</footer>
+<footer> © created by anandhu-chn 2025</footer>
 
     <script>
+
+// Get references to the elements
+        const txt = document.getElementById('txt');
+        const lineNumbers = document.getElementById('line-numbers');
+
+        // Add a scroll event listener to the textarea
+        txt.addEventListener('scroll', () => {
+            // Synchronize the scrollTop property of line-numbers with the textarea
+            lineNumbers.scrollTop = txt.scrollTop;
+        });
+        
         const tagPairs = {
             'html': '/html',
             'head': '/head',
