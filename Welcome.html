@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Our Page!</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+}
+
+#splash-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 1s ease-out;
+}
+
+#splash-screen.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#animated-element {
+    background: linear-gradient(to right, #50b0fa, #0073ed);
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    animation-name: welcomeAnimation;
+    animation-duration: 5s;
+    animation-timing-function: ease;
+    animation-direction: normal;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+
+    color: white;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    font-size: 23px;
+
+    will-change: transform, opacity, background-color, border-radius;
+}
+
+@keyframes welcomeAnimation {
+    0% {
+        transform: scale(1) rotate(0deg);
+        border-radius: 10px;
+        background: linear-gradient(to right, #50b0fa, #0073ed);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5) rotate(360deg);
+        border-radius: 50%;
+        opacity: 1;
+    }
+    100% {
+        transform: translate(0, -200px) scale(0.5);
+        opacity: 0;
+        background: linear-gradient(to right, rgb(2, 0, 10), red);
+        border-radius: 9px;
+    }
+}
+
+#main-content {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease-in;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    font-size: 1.2em;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-content.show {
+    opacity: 1;
+    visibility: visible;
+}
+</style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div id="animated-element">
+            Offline HTML Compiler
+        </div>
+    </div>
+
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElement = document.getElementById('animated-element');
+            const splashScreen = document.getElementById('splash-screen');
+            const mainContent = document.getElementById('main-content');
+            const body = document.body; 
+
+            animatedElement.addEventListener('animationend', () => {
+                splashScreen.classList.add('fade-out');
+
+                setTimeout(() => {
+                    splashScreen.remove();
+                    mainContent.classList.add('show');
+                    body.style.overflow = 'auto';
+                    body.style.backgroundColor = '#f0f0f0';
+
+                    // Simulate a "redirect" by changing the URL in the address bar
+                    // without reloading the page. This gives the appearance of
+                    // navigating to a "main page" within the single-page application.
+                    history.pushState({}, '', '/home'); // Changes URL to /home
+
+}, 1000);
+            
+
+let page=document.getElementById('animateted-element');
+               
+
+var redirectURL = "New_HTML_compiler.html";
+
+window.location.replace(redirectURL);
+
+
+});
+        });
+    </script>
+
+</body>
+</html>
