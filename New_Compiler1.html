@@ -1412,6 +1412,9 @@
     { name: "animation-play-state: ", description: "Specifies whether the animation is running or paused.", insert: "animation-play-state: running;" },
     { name: "animation: ", description: "Shorthand for all animation properties.", insert: "animation: myAnimation 1s ease-in-out infinite alternate forwards;" },
     { name: "@keyframes ", description: "Defines the animation sequence.", insert: "@keyframes myAnimation {\n  from { /* styles */ }\n  to { /* styles */ }\n}" },
+    { name: "@keyframes ", description: "Defines the animation sequence for CSS animations.", insert: "@keyframes myAnimation {\n  0% { /* styles for start of animation */ }\n  50% { /* styles for middle of animation */ }\n  100% { /* styles for end of animation */ }\n}" }, // Updated @keyframes based on your input
+
+            
     { name: "transform: scale()", description: "Scales an element (size change).", insert: "transform: scale(1.2);" },
     { name: "transform: rotate()", description: "Rotates an element in 2D.", insert: "transform: rotate(360deg);" },
     { name: "transform: translateX()", description: "Moves an element horizontally.", insert: "transform: translateX(100px);" },
