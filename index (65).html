@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riya - Your Personal Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode {
+            background-color: #1a202c; /* Tailwind gray-900 */
+        }
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 90vh; /* Responsive height */
+            max-height: 700px;
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15); /* Stronger shadow */
+            overflow: hidden;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        body.dark-mode .chat-container {
+            background-color: #2d3748; /* Tailwind gray-700 */
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        .chat-header {
+            padding: 1rem;
+            background-color: #60a5fa; /* Sky-400 */
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            border-bottom: 1px solid #c7d2fe; /* Indigo-200 */
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 20;
+        }
+        body.dark-mode .chat-header {
+            background-color: #4338ca; /* Indigo-700 */
+            border-color: #4f46e5; /* Indigo-600 */
+        }
+        .chat-header-title {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 1.25rem; /* text-xl */
+        }
+        .settings-button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem; /* text-2xl */
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .settings-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: rotate(15deg);
+        }
+        .settings-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .settings-panel.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .settings-content {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .settings-panel.open .settings-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        body.dark-mode .settings-content {
+            background-color: #2d3748;
+            color: white;
+        }
+        .settings-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e40af; /* Blue-800 */
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        body.dark-mode .settings-content h2 {
+            color: #93c5fd; /* Blue-300 */
+        }
+        .settings-section {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        body.dark-mode .settings-section {
+            border-color: #4a5568;
+        }
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .settings-section label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #4a5568;
+        }
+        body.dark-mode .settings-section label {
+            color: #a0aec0;
+        }
+        .settings-input {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            outline: none;
+            transition: border-color 0.2s;
+            color: #333;
+        }
+        body.dark-mode .settings-input {
+            background-color: #4a5568;
+            border-color: #64748b;
+            color: white;
+        }
+        .settings-input:focus {
+            border-color: #3b82f6;
+        }
+        .settings-button-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .settings-button-group button {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: background-color 0.2s, border-color 0.2s;
+            color: #4a5568;
+        }
+        body.dark-mode .settings-button-group button {
+            background-color: #4a5568;
+            border-color: #64748b;
+            color: white;
+        }
+        .settings-button-group button.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        body.dark-mode .settings-button-group button.active {
+            background-color: #4f46e5; /* Indigo-600 */
+            border-color: #4f46e5;
+        }
+        .settings-button-group button:hover {
+            background-color: #e2e8f0;
+        }
+        body.dark-mode .settings-button-group button:hover {
+            background-color: #64748b;
+        }
+        .help-content {
+            font-size: 0.875rem;
+            color: #4a5568;
+            line-height: 1.4;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .help-content.expanded {
+            max-height: 350px; /* Increased max-height for more content */
+        }
+        body.dark-mode .help-content {
+            color: #a0aec0;
+overflow: visible;
+        }
+        .close-settings-button {
+            background-color: #ef4444; /* Red-500 */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            margin-top: 1rem;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .close-settings-button:hover {
+            background-color: #dc2626; /* Red-600 */
+        }
+
+        /* --- Message Box Styles (for alert replacement) --- */
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .message-box-overlay.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .message-box-content {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            width: 90%;
+            max-width: 350px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .message-box-overlay.open .message-box-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        body.dark-mode .message-box-content {
+            background-color: #2d3748;
+            color: white;
+        }
+        .message-box-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: #1e40af;
+        }
+        body.dark-mode .message-box-title {
+            color: #93c5fd;
+        }
+        .message-box-body {
+            font-size: 1rem;
+            color: #4a5568;
+            margin-bottom: 1.25rem;
+        }
+        body.dark-mode .message-box-body {
+            color: #a0aec0;
+        }
+        .message-box-button {
+            padding: 0.75rem 1.5rem;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .message-box-button:hover {
+            background-color: #2563eb;
+        }
+        body.dark-mode .message-box-button {
+            background-color: #4f46e5;
+        }
+        body.dark-mode .message-box-button:hover {
+            background-color: #3730a3;
+        }
+
+        /* --- Chat History and Messages --- */
+        .chat-history {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            scroll-behavior: smooth;
+            background-color: #fefefe;
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .chat-history {
+            background-color: #2d3748;
+        }
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .message.user {
+            background-color: #e0f2fe; /* Sky-100 */
+            align-self: flex-end;
+            color: #1e40af; /* Blue-800 */
+            border-bottom-right-radius: 0.25rem;
+        }
+        body.dark-mode .message.user {
+            background-color: #4338ca; /* Indigo-700 */
+            color: #e0e7ff; /* Indigo-100 */
+        }
+        .message.bot {
+            background-color: #f0f9ff; /* Blue-50 */
+            align-self: flex-start;
+            color: #1d4ed8; /* Blue-700 */
+            border-bottom-left-radius: 0.25rem;
+        }
+        body.dark-mode .message.bot {
+            background-color: #4a5568; /* Gray-700 */
+            color: #e2e8f0; /* Gray-200 */
+        }
+        .message.system {
+            background-color: #fffbeb;
+            align-self: center;
+            color: #b45309;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            box-shadow: none;
+        }
+        body.dark-mode .message.system {
+            background-color: #3a3b3c;
+            color: #f6ad55;
+        }
+
+        .loading-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            color: #64748b;
+            transition: color 0.3s ease;
+        }
+        body.dark-mode .loading-indicator {
+            color: #a0aec0;
+        }
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #64748b;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: dot-pulse 1.4s infinite ease-in-out;
+            transition: background-color 0.3s ease;
+        }
+        body.dark-mode .loading-dot {
+            background-color: #a0aec0;
+        }
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+        .loading-dot:nth-child(3) { animation-delay: 0s; }
+
+        @keyframes dot-pulse {
+            0%, 80%, 100% { transform: scale(0); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        .chat-suggestions {
+            display: flex;
+            overflow-x: auto;
+            padding: 0.75rem 1rem;
+            gap: 0.5rem;
+            background-color: #fdfdfd;
+            border-bottom: 1px solid #e2e8f0;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        body.dark-mode .chat-suggestions {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        .chat-suggestions::-webkit-scrollbar {
+            display: none;
+        }
+        .suggestion-button {
+            flex-shrink: 0;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        body.dark-mode .suggestion-button {
+            background-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .suggestion-button:hover {
+            background-color: #cbd5e1;
+            transform: translateY(-2px);
+        }
+        body.dark-mode .suggestion-button:hover {
+            background-color: #64748b;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid #e2e8f0;
+            background-color: #ffffff;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        body.dark-mode .chat-input-area {
+            background-color: #2d3748;
+            border-color: #4a5568;
+        }
+        .chat-input {
+            flex-grow: 1;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.3s ease, color 0.3s ease;
+            color: #333;
+        }
+        body.dark-mode .chat-input {
+            background-color: #4a5568;
+            border-color: #64748b;
+            color: white;
+        }
+        .chat-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+        }
+        .send-button {
+            margin-left: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            border: none;
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .send-button:hover {
+            background-color: #2563eb;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .send-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        body.dark-mode .send-button {
+            background-color: #4f46e5;
+        }
+        body.dark-mode .send-button:hover {
+            background-color: #3730a3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <button id="settings-button" class="settings-button">⚙️</button>
+            <div class="chat-header-title">Chat with Riya</div>
+            <button id="hi-button" class="settings-button text-base px-2 py-1">Hi</button>
+        </div>
+
+        <div class="chat-history" id="chat-history">
+            <div class="message bot">Hello! I'm Riya, your personal assistant. How can I help you today?</div>
+        </div>
+
+        <div class="chat-suggestions" id="chat-suggestions">
+            <button class="suggestion-button">What are you capable of?</button>
+            <button class="suggestion-button">Tell me a joke</button>
+            <button class="suggestion-button">How to get an API key?</button>
+            <button class="suggestion-button">Suggest a movie</button>
+            <button class="suggestion-button">Explain AI in simple terms</button>
+        </div>
+
+        <div class="loading-indicator hidden" id="loading-indicator">
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="user-input" class="chat-input" placeholder="Chat with Riya...">
+            <button id="send-button" class="send-button">Send</button>
+        </div>
+    </div>
+
+    <!-- Settings Panel -->
+    <div id="settings-panel" class="settings-panel">
+        <div class="settings-content">
+            <h2>Settings</h2>
+
+            <div class="settings-section">
+                <label for="api-key-input">Gemini API Key</label>
+                <div class="flex gap-2">
+                    <input type="password" id="api-key-input" class="settings-input" placeholder="Enter your Gemini API key">
+                    <button id="add-api-key-button" class="px-4 py-2 bg-indigo-500 text-white rounded-md hover:bg-indigo-600 transition flex-shrink-0">Add</button>
+                    <button id="remove-api-key-button" class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition flex-shrink-0">Remove</button>
+                </div>
+                <p class="text-xs mt-2 text-red-500 font-medium body-dark-text">
+                    <span class="font-bold">SECURITY WARNING:</span> Storing API keys in browser local storage is INSECURE for production.
+                    This demo uses session-based storage, clearing on refresh/close.
+                </p>
+            </div>
+
+            <div class="settings-section">
+                <label>Theme</label>
+                <div class="settings-button-group">
+                    <button id="light-mode-button" class="active">Light Mode</button>
+                    <button id="dark-mode-button">Dark Mode</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <label>Help</label>
+                <button id="toggle-help-button" class="mt-2 w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition body-dark-button-bg body-dark-button-text">Toggle Help Content</button>
+                <div id="help-content" class="help-content mt-2 text-sm text-gray-600 body-dark-text" >
+                    <p><strong>How to get Gemini API Key:</strong></p>
+                    <p>1. Go to <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a>.</p>
+                    <p>2. Sign in with your Google account.</p>
+                    <p>3. Look for "Get API Key" or "Create API Key in new project".</p>
+                    <p>4. Copy your generated API key and keep it secure.</p>
+                    <p class="mt-2">This app uses a session-based API key. It will be cleared if you refresh or close the page.</p>
+                    <p class="mt-4"><strong>How to delete your API Key after use:</strong></p>
+                    <p>It's crucial to delete or restrict API keys when no longer needed or if compromised for security reasons.</p>
+                    <p class="mt-2"><strong>Method 1: Via Google AI Studio (Recommended)</strong></p>
+                    <p>1. Go to <a href="https://aistudio.google.com/" target="_blank" class="text-blue-600 hover:underline">Google AI Studio</a> and sign in.</p>
+                    <p>2. Navigate to "Get API key" or "Manage API Keys".</p>
+                    <p>3. Find the specific key you want to delete/revoke and use the delete/revoke option (often a trash can icon).</p>
+                    <p class="mt-2"><strong>Method 2: Via Google Cloud Console</strong></p>
+                    <p>1. Go to <a href="https://console.cloud.google.com/" target="_blank" class="text-blue-600 hover:underline">Google Cloud Console</a> and select your project.</p>
+                    <p>2. In the navigation menu, go to "APIs & Services" > "Credentials".</p>
+                    <p>3. Locate your API key, click the three vertical dots (&#x22EE;) next to it, and select "Delete" or "Restrict Key".</p>
+                    <p class="mt-2 font-bold text-red-600">Deletion is permanent. Ensure you delete the correct key!</p>
+                </div>
+            </div>
+
+            <button id="close-settings-button" class="close-settings-button">Close Settings</button>
+        </div>
+    </div>
+
+    <!-- Custom Message Box Overlay -->
+    <div id="message-box-overlay" class="message-box-overlay">
+        <div class="message-box-content">
+            <div id="message-box-title" class="message-box-title"></div>
+            <div id="message-box-body" class="message-box-body"></div>
+            <button id="message-box-ok-button" class="message-box-button">OK</button>
+        </div>
+    </div>
+
+
+    <script>
+        let currentApiKey = "";
+
+        const API_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models/";
+        const MODEL_ID = "gemini-2.0-flash";
+
+        const chatHistoryDiv = document.getElementById('chat-history');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const chatSuggestionsDiv = document.getElementById('chat-suggestions');
+        const settingsButton = document.getElementById('settings-button');
+        const settingsPanel = document.getElementById('settings-panel');
+        const closeSettingsButton = document.getElementById('close-settings-button');
+        const lightModeButton = document.getElementById('light-mode-button');
+        const darkModeButton = document.getElementById('dark-mode-button');
+        const toggleHelpButton = document.getElementById('toggle-help-button');
+        const helpContentDiv = document.getElementById('help-content');
+        const addApiKeyButton = document.getElementById('add-api-key-button');
+        const removeApiKeyButton = document.getElementById('remove-api-key-button');
+        const apiKeyInput = document.getElementById('api-key-input');
+        const hiButton = document.getElementById('hi-button');
+
+        const messageBoxOverlay = document.getElementById('message-box-overlay');
+        const messageBoxTitle = document.getElementById('message-box-title');
+        const messageBoxBody = document.getElementById('message-box-body');
+        const messageBoxOkButton = document.getElementById('message-box-ok-button');
+
+        let conversationHistory = [];
+
+        const showMessage = (title, message) => {
+            messageBoxTitle.textContent = title;
+            messageBoxBody.textContent = message;
+            messageBoxOverlay.classList.add('open');
+        };
+
+        const hideMessage = () => {
+            messageBoxOverlay.classList.remove('open');
+        };
+        messageBoxOkButton.addEventListener('click', hideMessage);
+
+        const appendMessage = (sender, text) => {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.textContent = text;
+            chatHistoryDiv.appendChild(messageDiv);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+        };
+
+        const toggleLoading = (show) => {
+            if (show) {
+                loadingIndicator.classList.remove('hidden');
+                sendButton.disabled = true;
+                userInput.disabled = true;
+            } else {
+                loadingIndicator.classList.add('hidden');
+                sendButton.disabled = false;
+                userInput.disabled = false;
+                userInput.focus();
+            }
+        };
+
+        const updateApiKeyUI = () => {
+            if (currentApiKey) {
+                apiKeyInput.value = "•".repeat(currentApiKey.length);
+                addApiKeyButton.disabled = true;
+                removeApiKeyButton.disabled = false;
+            } else {
+                apiKeyInput.value = "";
+                addApiKeyButton.disabled = false;
+                removeApiKeyButton.disabled = true;
+            }
+        };
+
+        const sendMessage = async (message) => {
+            if (!message) return;
+
+            appendMessage('user', message);
+            userInput.value = '';
+            toggleLoading(true);
+
+            let keyToUseForApi = currentApiKey;
+            if (!keyToUseForApi && typeof __app_id === 'undefined') {
+                 appendMessage('system', "Please add your Gemini API Key in Settings to chat.");
+                 toggleLoading(false);
+                 return;
+            }
+
+            const apiUrl = `${API_URL_BASE}${MODEL_ID}:generateContent?key=${keyToUseForApi}`;
+
+            conversationHistory.push({ role: "user", parts: [{ text: message }] });
+
+            const payload = {
+                contents: conversationHistory,
+                generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 200,
+                },
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorResponse = await response.json();
+                    const errorMessage = errorResponse.error?.message || 'API request failed.';
+                    appendMessage('system', `Error: ${errorMessage}`);
+                    console.error("API error:", response.status, errorResponse);
+                    conversationHistory.pop();
+                    if (response.status === 401 || response.status === 403) {
+                        showMessage("API Key Error", "Your API key might be invalid or unauthorized. Please check it in Settings.");
+                    } else if (response.status === 429) {
+                        showMessage("Rate Limit Exceeded", "You've sent too many requests. Please wait a moment and try again.");
+                    }
+                    return;
+                }
+
+                const result = await response.json();
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const botResponse = result.candidates[0].content.parts[0].text;
+                    appendMessage('bot', botResponse);
+                    conversationHistory.push({ role: "model", parts: [{ text: botResponse }] });
+                } else {
+                    appendMessage('system', "Riya didn't get a clear response. Can you try rephrasing?");
+                    conversationHistory.pop();
+                }
+
+            } catch (error) {
+                appendMessage('system', `Network Error: ${error.message}. Please check your connection.`);
+                console.error("Network or parsing error:", error);
+                conversationHistory.pop();
+            } finally {
+                toggleLoading(false);
+            }
+        };
+
+        sendButton.addEventListener('click', () => sendMessage(userInput.value));
+        userInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage(userInput.value);
+            }
+        });
+
+        chatSuggestionsDiv.addEventListener('click', (event) => {
+            if (event.target.classList.contains('suggestion-button')) {
+                sendMessage(event.target.textContent);
+            }
+        });
+
+        settingsButton.addEventListener('click', () => {
+            settingsPanel.classList.add('open');
+            updateApiKeyUI();
+        });
+
+        closeSettingsButton.addEventListener('click', () => {
+            settingsPanel.classList.remove('open');
+        });
+
+        lightModeButton.addEventListener('click', () => {
+            document.body.classList.remove('dark-mode');
+            lightModeButton.classList.add('active');
+            darkModeButton.classList.remove('active');
+            localStorage.setItem('theme', 'light');
+        });
+
+        darkModeButton.addEventListener('click', () => {
+            document.body.classList.add('dark-mode');
+            darkModeButton.classList.add('active');
+            lightModeButton.classList.remove('active');
+            localStorage.setItem('theme', 'dark');
+        });
+
+        toggleHelpButton.addEventListener('click', () => {
+            helpContentDiv.classList.toggle('expanded');
+        });
+
+        addApiKeyButton.addEventListener('click', () => {
+            const enteredKey = apiKeyInput.value.trim();
+            if (enteredKey) {
+                currentApiKey = enteredKey;
+                updateApiKeyUI();
+                showMessage("API Key Added", "Your Gemini API key is active for this session. It will be cleared on refresh or close.");
+            } else {
+                showMessage("Input Required", "Please enter your API key to add it.");
+            }
+        });
+
+        removeApiKeyButton.addEventListener('click', () => {
+            currentApiKey = "";
+            updateApiKeyUI();
+            showMessage("API Key Removed", "Your Gemini API key has been removed from this session.");
+        });
+
+        hiButton.addEventListener('click', () => {
+            sendMessage('Hi Riya!');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            userInput.focus();
+            conversationHistory.push({ role: "model", parts: [{ text: "Hello! I'm Riya, your personal assistant. How can I help you today?" }] });
+
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                darkModeButton.classList.add('active');
+            } else {
+                lightModeButton.classList.add('active');
+            }
+
+            updateApiKeyUI();
+        });
+    </script>
+</body>
+</html>
