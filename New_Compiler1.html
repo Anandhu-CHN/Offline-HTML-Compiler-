@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Offline HTML Compiler</title>
-
-    <!-- Google Fonts - Inter for a clean look -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-   
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -663,180 +656,235 @@
         }
 
 
-          #open-cdn-btn {
-            @apply bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md transition-all duration-300 ease-in-out;
-            @apply hover:bg-indigo-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75;
-            margin-top: 20px; /* Space from top of page */
-            margin-bottom: 30px; /* Space before any other content */
-        }
 
-        /* Styles for the CDN Library Panel */
+
+
+
+
+
+
+
+
+
+    /* Styles for the "Open CDN Library" Button */
+    #open-cdn-btn {
+        background-color: #4f46e5; /* Indigo-600 */
+        color: white;
+        padding: 0.75rem 1.5rem; /* px-6 py-3 */
+        border-radius: 0.5rem; /* rounded-lg */
+        font-weight: 600; /* font-semibold */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+        transition: all 0.3s ease-in-out;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        cursor: pointer;
+        border: none;
+        outline: none;
+    }
+    #open-cdn-btn:hover {
+        background-color: #4338ca; /* Indigo-700 */
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15); /* hover:shadow-xl */
+    }
+    #open-cdn-btn:focus {
+        ring: 2px solid #6366f1; /* ring-indigo-500 */
+        ring-opacity: 0.75; /* ring-opacity-75 */
+    }
+
+    /* Styles for the CDN Library Panel (Modal) */
+    #cdn-library-panel {
+        /* Positioning to float over content when open */
+        position: fixed; /* Fixed position relative to viewport */
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.95); /* Start slightly smaller for scale animation */
+        z-index: 100; /* Ensure it's above other content */
+
+        /* Visual styles for the panel itself */
+        background-color: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Stronger shadow for pop-up effect */
+        color: #2d3748;
+        padding: 2rem;
+        border-radius: 1rem;
+        width: 90%; /* Responsive width */
+        max-width: 48rem; /* Max width for readability */
+        max-height: 90vh; /* Max height to prevent overflow on smaller screens */
+        overflow: auto; /* Hide scrollbar initially, content inside handles scrolling */
+
+        /* Hidden by default with animation properties */
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-out, visibility 0.3s ease-out, transform 0.3s ease-out;
+    }
+    #cdn-library-panel.visible {
+        opacity: 1;
+        visibility: visible;
+        transform: translate(-50%, -50%) scale(1); /* Scale up to original size */
+    }
+
+    #cdn-library-panel h2 {
+        color: #1a202c; /* Even darker heading for contrast */
+        letter-spacing: 0.025em;
+        margin-bottom: 2rem; /* mb-8 */
+        text-align: center;
+        position: relative; /* For close button positioning */
+    }
+
+    /* Styles for the "Close" Button inside the panel */
+    #close-cdn-btn {
+        position: absolute;
+        top: 1rem; /* top-4 */
+        right: 1rem; /* right-4 */
+        background-color: #ef4444; /* Red-500 */
+        color: white;
+        border-radius: 9999px; /* rounded-full */
+        height: 2rem; /* h-8 */
+        width: 2rem; /* w-8 */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem; /* text-xl */
+        font-weight: 700; /* font-bold */
+        line-height: 1; /* Center the 'X' vertically */
+        cursor: pointer;
+        border: none;
+        outline: none;
+        transition: background-color 0.2s ease-in-out;
+    }
+    #close-cdn-btn:hover {
+        background-color: #dc2626; /* Red-600 */
+    }
+    #close-cdn-btn:focus {
+        ring: 2px solid #f87171; /* ring-red-400 */
+        ring-opacity: 0.75; /* ring-opacity-75 */
+    }
+
+    /* Styling for individual CDN items (list items) */
+    .cdn-item {
+        background-color: #f8fafc; /* Very light background for cards */
+        border: 1px solid #e2e8f0; /* Light card border */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); /* Lighter card shadow */
+        transition: transform 0.3s ease-out, box-shadow 0.3s ease-out; /* Smooth hover transition */
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1.5rem; /* space-y-6 equivalent for li */
+    }
+    .cdn-item:last-child {
+        margin-bottom: 0; /* Remove bottom margin for last item in space-y */
+    }
+    .cdn-item:hover {
+        transform: translateY(-3px); /* Slightly less lift effect on hover */
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12); /* Enhanced shadow on hover */
+    }
+
+    .cdn-item h3 {
+        color: #2563eb; /* A nice blue for names */
+        letter-spacing: 0.01em;
+        font-size: 1.25rem; /* text-xl */
+        font-weight: 600; /* font-semibold */
+        margin-bottom: 0.5rem;
+    }
+
+    .cdn-item p {
+        color: #4a5568; /* Medium gray for descriptions */
+        line-height: 1.5;
+        font-size: 0.875rem; /* text-sm */
+        margin-bottom: 1rem;
+    }
+
+    /* Styling for the "Copy URL" link/button */
+    .cdn-link {
+        display: inline-block;
+        padding: 0.6rem 1.4rem;
+        border-radius: 0.375rem;
+        font-weight: 500;
+        color: #ffffff;
+        background: linear-gradient(45deg, #3b82f6, #2563eb); /* Blue gradient */
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
+        transition: all 0.3s ease-out;
+        text-decoration: none;
+        font-size: 0.875rem;
+        cursor: pointer; /* Indicate it's clickable */
+    }
+    .cdn-link:hover {
+        background: linear-gradient(45deg, #2563eb, #1e40af); /* Darker blue on hover */
+        box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
+    }
+    .cdn-link:focus {
+        outline: none;
+        ring: 2px solid #60a5fa; /* ring-blue-400 */
+        ring-opacity: 0.75;
+    }
+
+    /* Message box for copy feedback */
+    .message-box {
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333; /* Dark background for contrast */
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden; /* Use visibility for smooth show/hide */
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+    .message-box.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Overlay for when the modal is open */
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+        z-index: 99; /* Below the modal, above other content */
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+    }
+    .overlay.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* Scrollbar styling for a modern light look (Webkit browsers) */
+    #cdn-list::-webkit-scrollbar {
+        width: 8px;
+    }
+    #cdn-list::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    #cdn-list::-webkit-scrollbar-thumb {
+        background: #a7d9f8;
+        border-radius: 10px;
+    }
+    #cdn-list::-webkit-scrollbar-thumb:hover {
+        background: #7bd0f5;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
         #cdn-library-panel {
-            /* Positioning to float over content when open */
-            position: fixed; /* Fixed position relative to viewport */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%); /* Center the div */
-            z-index: 100; /* Ensure it's above other content */
-
-            /* Visual styles for the panel itself */
-            background-color: #ffffff;
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* Slightly stronger shadow for a pop-up */
-            color: #2d3748;
-            padding: 2rem;
-            border-radius: 1rem;
-            width: 90%; /* Responsive width */
-            max-width: 48rem;
-            max-height: 90vh; /* Max height to prevent overflow on smaller screens */
-            overflow: hidden; /* Hide scrollbar initially, handle internally */
-
-            /* Hidden by default with animation properties */
-            opacity: 0;
-            visibility: hidden;
-            transform: translate(-50%, -50%) scale(0.95); /* Start slightly smaller for scale animation */
-            transition: opacity 0.3s ease-out, visibility 0.3s ease-out, transform 0.3s ease-out;
+            width: 95%;
+            padding: 1rem;
         }
-
-        #cdn-library-panel.visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, -50%) scale(1); /* Scale up to original size */
-        }
-
-        #cdn-library-panel h2 {
-            color: #1a202c;
-            text-shadow: none;
-            letter-spacing: 0.025em;
-            position: relative; /* For close button positioning */
-        }
-
-        #close-cdn-btn {
-            @apply absolute top-4 right-4 bg-red-500 text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold;
-            @apply hover:bg-red-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75;
-            line-height: 1; /* Center the 'X' */
-        }
-
         .cdn-item {
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
-            padding: 1.5rem;
-            border-radius: 0.5rem;
+            padding: 1rem;
         }
-
-        .cdn-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
-        }
-
         .cdn-item h3 {
-            color: #2563eb;
-            letter-spacing: 0.01em;
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 1.125rem; /* text-lg */
         }
-
-        .cdn-item p {
-            color: #4a5568;
-            line-height: 1.5;
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-
-        .cdn-link {
-            display: inline-block;
-            padding: 0.6rem 1.4rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            color: #ffffff;
-            background: linear-gradient(45deg, #3b82f6, #2563eb);
-            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
-            transition: all 0.3s ease-out;
-            text-decoration: none;
-            font-size: 0.875rem;
-        }
-
-        .cdn-link:hover {
-            background: linear-gradient(45deg, #2563eb, #1e40af);
-            box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
-            transform: translateY(-2px);
-        }
-
-        /* Message box for copy feedback */
-        .message-box {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-
-        .message-box.show {
-            opacity: 1;
-        }
-
-        /* Scrollbar styling for a modern light look (Webkit browsers) */
-        #cdn-list::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #cdn-list::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-        }
-
-        #cdn-list::-webkit-scrollbar-thumb {
-            background: #a7d9f8;
-            border-radius: 10px;
-        }
-
-        #cdn-list::-webkit-scrollbar-thumb:hover {
-            background: #7bd0f5;
-        }
-
-        /* Overlay for when the modal is open */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
-            z-index: 99; /* Below the modal, above other content */
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
-
-        .overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            #cdn-library-panel {
-                width: 95%;
-                padding: 1rem;
-            }
-            .cdn-item {
-                padding: 1rem;
-            }
-            .cdn-item h3 {
-                font-size: 1.125rem; /* text-lg */
-            }
-        }
-
+    }
     </style>
 </head>
 
@@ -874,7 +922,7 @@
                 `doc`, `con`, `get`) to get suggestions.</li>
             <li><strong>Cascading Style Sheets (CSS) + Html Attributes Suggestions:</strong> Start typing common CSS / Html Attributes (e.g.,
                 'overflow','padding','width','style','href' etc) to get suggestions.</li>
-            <li><strong>Creator's Functions Feature :</strong> You can js functions defined by me functions or define,save & use your own functions.
+            <li><strong>Creator's Functions Feature :</strong> You can js functions defined by me functions or define,save &amp; use your own functions.
             <i>Note</i>: It will be visible in your browser only. It will be there unless You clear your browsing data.</li>
         </ul>
         <button onclick="toggleHelp()">Close</button>
@@ -888,27 +936,24 @@
 
     <div id="image-upload-container">
         <button id="image-upload" onclick="document.getElementById('image-upload-input').click()">Upload Image</button>
-        <input type="file" id="image-upload-input" accept="image/*" multiple onchange="uploadImages(event)">
+        <input type="file" id="image-upload-input" accept="image/*" multiple="" onchange="uploadImages(event)">
         <div id="uploaded-image-preview-container">
         </div>
         <button id="download-compiler" onclick="downloadCompiler()">Download Compiler</button>
         <button id="creator-functions-button" onclick="toggleCreatorFunctions()">Creator's Functions</button>
     </div>
 
-    <div id="creator-functions-div">
+    <div id="creator-functions-div" style="display: none;">
         <h3>Creator's Functions</h3>
-        <input type="search" id="creator-functions-search" placeholder="Search functions by name or feature..."
-            oninput="searchCreatorFunctions()">
+        <input type="search" id="creator-functions-search" placeholder="Search functions by name or feature..." oninput="searchCreatorFunctions()">
         <button id="add-function-btn" onclick="showAddFunctionModal()">+</button>
-        <ul id="creator-functions-list">
-        </ul>
+        <ul id="creator-functions-list"><li><strong>rotateColors:</strong> Cycles through an array of colors and applies them to an array of HTML elements. Use for dynamic color changes, rotating elements.</li><li><strong>MyFunction1:</strong> Performs data validation on input fields.</li><li><strong>CalculateTotal:</strong> Calculates the sum of items in a shopping cart.</li><li><strong>AnimateElement:</strong> Adds a fading animation to a DOM element.</li><li><strong>SaveUserSettings:</strong> Persists user preferences to local storage.</li><li><strong>FormatDate:</strong> Converts a date object to a 'YYYY-MM-DD' string.</li><li><strong>ValidateEmail:</strong> Checks if a given string is a valid email format.</li><li><strong>LoadDataFromAPI:</strong> Fetches data from a specified REST API endpoint.</li><li><strong>GenerateReport:</strong> Compiles and formats data into a printable report.</li><li><strong>ToggleVisibility:</strong> Hides or shows a specified HTML element.</li></ul>
         <button onclick="toggleCreatorFunctions()">Close</button>
     </div>
 
 
 
-
-    
+ 
 <button id="open-cdn-btn">Open CDN Library</button>
 
     <!-- Overlay to dim background when modal is open -->
@@ -926,9 +971,6 @@
     <div id="message-box" class="message-box"></div>
 
 
-
-    
-    
     <div id="image-shortcuts-container">
         <h3>Image Shortcuts</h3>
         <div id="image-shortcuts">
@@ -938,8 +980,7 @@
     <div id="compiler-container">
         <div id="input-area">
             <div id="line-numbers">1</div>
-            <textarea id="txt" oninput="updateLineNumbers(); showSuggestions(event)" onkeydown="handleKeyDown(event)"
-                autocomplete="off"></textarea>
+            <textarea id="txt" oninput="updateLineNumbers(); showSuggestions(event)" onkeydown="handleKeyDown(event)" autocomplete="off"></textarea>
             <div id="suggestions" class="suggestions"></div>
         </div>
         <div class="controls">
@@ -956,8 +997,8 @@
         <img src="" alt="Image Preview">
     </div>
 
-    <div class="modal-backdrop" id="add-function-backdrop"></div>
-    <div id="add-function-modal">
+    <div class="modal-backdrop" id="add-function-backdrop" style="display: none;"></div>
+    <div id="add-function-modal" style="display: none;">
         <h4>Add New Creator Function</h4>
         <label for="function-name-input">Function Name:</label>
         <input type="text" id="function-name-input" placeholder="e.g., myFunction">
@@ -966,8 +1007,7 @@
         <input type="text" id="function-feature-input" placeholder="e.g., Handles user input validation.">
 
         <label for="function-definition-textarea">Function Code/Definition:</label>
-        <textarea id="function-definition-textarea"
-            placeholder="function myFunction(param) { /* code here */ }"></textarea>
+        <textarea id="function-definition-textarea" placeholder="function myFunction(param) { /* code here */ }"></textarea>
 
         <div class="modal-buttons">
             <button class="add" onclick="addCustomFunction()">Add Function</button>
@@ -1649,60 +1689,8 @@
     { name: "cubic-bezier()", description: "Defines a Bezier curve for timing functions.", insert: "cubic-bezier(0.42, 0, 0.58, 1);" },
     { name: "steps()", description: "Defines a stepping function for timing functions.", insert: "steps(5, end);" },
     { name: "animation-composition: ", description: "Specifies how an animation's effects are composited with the underlying value.", insert: "animation-composition: replace;" },
-    { name: "animation-timeline: ", description: "Associates an animation with a custom timeline.", insert: "animation-timeline: scroll(block);" },
-
-     //---safeCDNList ---
-    // --- UI Frameworks ---
-    {
-        name: 'Bootstrap 5.3.3 CSS CDN',
-        description: 'Bootstrap\'s compiled and minified CSS for responsive design. Place this in the <head> section of your HTML document.',
-        insert: "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH' crossorigin='anonymous'>"
-    },
-    {
-        name: 'Bootstrap 5.3.3 JS Bundle CDN (with Popper.js)',
-        description: 'Bootstrap\'s JavaScript components including Popper.js (for tooltips, popovers, etc.). Place this just before the closing </body> tag in your HTML for optimal performance and to ensure the DOM is ready.',
-        insert: "<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js' integrity='sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDjOxhy9GkcIdslK1eN7N6jIeHz' crossorigin='anonymous'></script>"
-    },
-    {
-        name: 'Tailwind CSS CDN (JIT mode)',
-        description: 'A utility-first CSS framework. This script dynamically compiles Tailwind classes. Place it at the end of your head tag or at the beginning of your <body> for development.',
-        insert: "<script src='https://cdn.tailwindcss.com'></script>"
-    },
-
-    // --- Icon Libraries ---
-    {
-        name: 'Font Awesome Free 6.5.2 (CSS)',
-        description: 'The most popular icon library for web fonts and SVG icons. Place this in the <head> section of your HTML document.',
-        insert: "<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css' integrity='sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==' crossorigin='anonymous' referrerpolicy='no-referrer' />"
-    },
-    {
-        name: 'Bootstrap Icons 1.11.3 (CSS)',
-        description: 'Official SVG icon library for Bootstrap projects. Place this in the <head> section of your HTML document.',
-        insert: "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'>"
-    },
-    {
-        name: 'Material Icons (Google Fonts)',
-        description: 'Google\'s widely used open-source icon set. Place this in the <head> section of your HTML document.',
-        insert: "<link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>"
-    },
-    {
-        name: 'Lucide Icons (JS Library)',
-        description: 'A beautiful, customizable icon library. Place this script just before the closing </body> tag. You\'ll need separate JS to call `lucide.createIcons()` after the DOM loads.',
-        insert: "<script src='https://unpkg.com/lucide@0.370.0/dist/umd/lucide.js' crossorigin='anonymous'></script>"
-    },
-
-    // --- Animation & Motion Libraries ---
-    {
-        name: 'AOS (Animate On Scroll) CSS 2.3.1',
-        description: 'CSS styles for the Animate On Scroll library. Place this in the <head> section of your HTML document.',
-        insert: "<link href='https://unpkg.com/aos@2.3.1/dist/aos.css' rel='stylesheet'>"
-    },
-    {
-        name: 'AOS (Animate On Scroll) JS 2.3.1',
-        description: 'JavaScript for AOS. Place this script just before the closing </body> tag. After this, you\'ll need a separate <script> block with `AOS.init();` to activate animations.',
-        insert: "<script src='https://unpkg.com/aos@2.3.1/dist/aos.js' crossorigin='anonymous'></script>"
-    }
-
+    { name: "animation-timeline: ", description: "Associates an animation with a custom timeline.", insert: "animation-timeline: scroll(block);" }
+         
 ];
 
         let uploadedImageDataURLs = [];
@@ -2414,197 +2402,224 @@
     // Initial load of functions when the DOM content is fully loaded
     document.addEventListener('DOMContentLoaded', () => {
         loadFunctionsFromLocalStorage();
+    }); 
+
+
+    // Define the list of safe CDNs, including their full URLs
+    const safeCDNList = [
+        // --- UI Frameworks ---
+        {
+            name: 'Bootstrap 5.3.3 CSS CDN',
+            description: 'Bootstrap\'s compiled and minified CSS for responsive design. Place this in the &lt;head&gt; section of your HTML document.',
+            url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
+        },
+        {
+            name: 'Bootstrap 5.3.3 JS Bundle CDN (with Popper.js)',
+            description: 'Bootstrap\'s JavaScript components including Popper.js (for tooltips, popovers, etc.). Place this just before the closing &lt;/body&gt; tag in your HTML for optimal performance and to ensure the DOM is ready.',
+            url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'
+        },
+        {
+            name: 'Tailwind CSS CDN (JIT mode)',
+            description: 'A utility-first CSS framework. This script dynamically compiles Tailwind classes. Place it at the end of your &lt;head&gt; or at the beginning of your &lt;body&gt; for development.',
+            url: 'https://cdn.tailwindcss.com'
+        },
+
+        // --- Icon Libraries ---
+        {
+            name: 'Font Awesome Free 6.5.2 (CSS)',
+            description: 'The most popular icon library for web fonts and SVG icons. Place this in the &lt;head&gt; section of your HTML document.',
+            url: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'
+        },
+        {
+            name: 'Bootstrap Icons 1.11.3 (CSS)',
+            description: 'Official SVG icon library for Bootstrap projects. Place this in the &lt;head&gt; section of your HTML document.',
+            url: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'
+        },
+        {
+            name: 'Material Icons (Google Fonts)',
+            description: 'Google\'s widely used open-source icon set. Place this in the &lt;head&gt; section of your HTML document.',
+            url: 'https://fonts.googleapis.com/icon?family=Material+Icons'
+        },
+        {
+            name: 'Lucide Icons (JS Library)',
+            description: 'A beautiful, customizable icon library. Place this script just before the closing &lt;/body&gt; tag. You\'ll need separate JS to call `lucide.createIcons()` after the DOM loads.',
+            url: 'https://unpkg.com/lucide@0.370.0/dist/umd/lucide.js'
+        },
+
+        // --- Animation & Motion Libraries ---
+        {
+            name: 'AOS (Animate On Scroll) CSS 2.3.1',
+            description: 'CSS styles for the Animate On Scroll library. Place this in the &lt;head&gt; section of your HTML document.',
+            url: 'https://unpkg.com/aos@2.3.1/dist/aos.css'
+        },
+        {
+            name: 'AOS (Animate On Scroll) JS 2.3.1',
+            description: 'JavaScript for AOS. Place this script just before the closing &lt;/body&gt; tag. After this, you\'ll need a separate &lt;script&gt; block with `AOS.init();` to activate animations.',
+            url: 'https://unpkg.com/aos@2.3.1/dist/aos.js'
+        },
+        {
+            name: 'GSAP (GreenSock Animation Platform) Core JS 3.12.5',
+            description: 'The core engine for professional-grade JavaScript animations. Place this script just before the closing &lt;/body&gt; tag.',
+            url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js'
+        }
+    ];
+
+    // Get references to DOM elements
+    const openCdnButton = document.getElementById('open-cdn-btn');
+    const cdnLibraryPanel = document.getElementById('cdn-library-panel');
+    const closeCdnButton = document.getElementById('close-cdn-btn');
+    const cdnListContainer = document.getElementById('cdn-list');
+    const messageBox = document.getElementById('message-box');
+    const overlay = document.getElementById('overlay');
+
+    /**
+     * Displays a temporary message box for user feedback.
+     * @param {string} message The message to display.
+     * @param {string} type 'success' or 'error' (for potential future styling).
+     */
+    function showMessageBox(message, type = 'success') {
+        messageBox.textContent = message;
+        messageBox.classList.add('show');
+
+        // Apply type-specific background color for immediate feedback
+        if (type === 'success') {
+            messageBox.style.backgroundColor = '#4CAF50'; /* Green */
+        } else if (type === 'error') {
+            messageBox.style.backgroundColor = '#f44336'; /* Red */
+        } else {
+            messageBox.style.backgroundColor = '#333'; /* Default */
+        }
+
+        // Hide the message box after a delay
+        setTimeout(() => {
+            messageBox.classList.remove('show');
+            // Reset background color after hiding
+            messageBox.style.backgroundColor = '';
+        }, 2000); // Hide after 2 seconds
+    }
+
+    /**
+     * Copies the given text (URL) to the clipboard.
+     * Prioritizes navigator.clipboard.writeText, falls back to document.execCommand.
+     * @param {string} textToCopy The text (URL in this case) to copy.
+     */
+    function copyUrlToClipboard(textToCopy) {
+        // Attempt to use the modern Clipboard API
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(() => {
+                    showMessageBox('URL Copied!', 'success');
+                })
+                .catch(err => {
+                    console.error('Failed to copy via clipboard API:', err);
+                    // Fallback if Clipboard API fails or is not available (e.g., in some iframes)
+                    fallbackCopyTextToClipboard(textToCopy);
+                });
+        } else {
+            // Fallback for older browsers or non-secure contexts
+            fallbackCopyTextToClipboard(textToCopy);
+        }
+    }
+
+    /**
+     * Fallback function to copy text using document.execCommand.
+     * This method is generally more reliable in various iframe/browser environments
+     * than navigator.clipboard.writeText.
+     * @param {string} textToCopy The text to copy.
+     */
+    function fallbackCopyTextToClipboard(textToCopy) {
+        // Create a temporary textarea element to hold the text
+        const tempTextarea = document.createElement('textarea');
+        tempTextarea.value = textToCopy;
+
+        // Hide the textarea from view
+        tempTextarea.style.position = 'fixed';
+        tempTextarea.style.left = '-9999px';
+        tempTextarea.style.top = '-9999px'; // Ensure it's off-screen
+
+        document.body.appendChild(tempTextarea); // Append to body
+
+        tempTextarea.focus(); // Focus the textarea
+        tempTextarea.select(); // Select its content
+        tempTextarea.setSelectionRange(0, 99999); // For mobile devices
+
+        try {
+            // Execute the copy command
+            const successful = document.execCommand('copy');
+            if (successful) {
+                showMessageBox('URL Copied!', 'success'); // Indicate success
+            } else {
+                showMessageBox('Copy Failed! Please copy manually.', 'error'); // Indicate failure
+            }
+        } catch (err) {
+            console.error('Fallback copy failed:', err);
+            showMessageBox('Copy Failed! Please copy manually. (Error)', 'error'); // Report error
+        } finally {
+            document.body.removeChild(tempTextarea); // Clean up the temporary textarea
+        }
+    }
+
+    /**
+     * Dynamically populates the CDN list panel.
+     * Creates list items with CDN details and a "Copy URL" link.
+     */
+    function populateCdnList() {
+        cdnListContainer.innerHTML = ''; // Clear existing content to prevent duplicates on re-render
+
+        safeCDNList.forEach((cdn) => {
+            const cdnItem = document.createElement('li');
+            // Add Tailwind classes for styling (mb-6 for spacing, last:mb-0 for last item)
+            cdnItem.classList.add('cdn-item', 'mb-6', 'last:mb-0');
+
+            // Set the inner HTML of the list item
+            // The 'cdn.description' contains HTML entities (&lt;head&gt;), which are correctly parsed.
+            cdnItem.innerHTML = `
+                <h3 class="text-xl font-semibold mb-2">${cdn.name}</h3>
+                <p class="text-sm mb-4">${cdn.description}</p>
+                <a href="#" data-cdn-url="${cdn.url}" class="cdn-link px-5 py-2 rounded-md font-medium shadow-lg">
+                    Copy URL
+                </a>
+            `;
+
+            // Attach the event listener to the dynamically created 'Copy URL' link
+            const cdnLink = cdnItem.querySelector('.cdn-link');
+            cdnLink.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent the default link behavior (e.g., navigating to #)
+                const urlToCopy = cdnLink.dataset.cdnUrl; // Retrieve the URL from the data-cdn-url attribute
+                copyUrlToClipboard(urlToCopy); // Call the copy function
+            });
+
+            cdnListContainer.appendChild(cdnItem); // Add the new list item to the container
+        });
+    }
+
+    // --- Event Listeners for Open/Close Buttons and Overlay ---
+
+    // Event listener for the "Open CDN Library" button
+    openCdnButton.addEventListener('click', () => {
+        cdnLibraryPanel.classList.add('visible'); // Show the CDN panel
+        overlay.classList.add('visible'); // Show the semi-transparent overlay
     });
 
-//CDN Library function parts
+    // Event listener for the "Close" button inside the CDN panel
+    closeCdnButton.addEventListener('click', () => {
+        cdnLibraryPanel.classList.remove('visible'); // Hide the CDN panel
+        overlay.classList.remove('visible'); // Hide the overlay
+    });
 
-            // Define the list of safe CDNs, including their full URLs
-        const safeCDNList = [
-            // --- UI Frameworks ---
-            {
-                name: 'Bootstrap 5.3.3 CSS CDN',
-                description: 'Bootstrap\'s compiled and minified CSS for responsive design. Place this in the &lt;head&gt; section of your HTML document.',
-                url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
-            },
-            {
-                name: 'Bootstrap 5.3.3 JS Bundle CDN (with Popper.js)',
-                description: 'Bootstrap\'s JavaScript components including Popper.js (for tooltips, popovers, etc.). Place this just before the closing &lt;/body&gt; tag in your HTML for optimal performance and to ensure the DOM is ready.',
-                url: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'
-            },
-            {
-                name: 'Tailwind CSS CDN (JIT mode)',
-                description: 'A utility-first CSS framework. This script dynamically compiles Tailwind classes. Place it at the end of your &lt;head&gt; or at the beginning of your &lt;body&gt; for development.',
-                url: 'https://cdn.tailwindcss.com'
-            },
+    // Event listener for clicking on the overlay (to close the panel)
+    overlay.addEventListener('click', () => {
+        cdnLibraryPanel.classList.remove('visible'); // Hide the CDN panel
+        overlay.classList.remove('visible'); // Hide the overlay
+    });
 
-            // --- Icon Libraries ---
-            {
-                name: 'Font Awesome Free 6.5.2 (CSS)',
-                description: 'The most popular icon library for web fonts and SVG icons. Place this in the &lt;head&gt; section of your HTML document.',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'
-            },
-            {
-                name: 'Bootstrap Icons 1.11.3 (CSS)',
-                description: 'Official SVG icon library for Bootstrap projects. Place this in the &lt;head&gt; section of your HTML document.',
-                url: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'
-            },
-            {
-                name: 'Material Icons (Google Fonts)',
-                description: 'Google\'s widely used open-source icon set. Place this in the &lt;head&gt; section of your HTML document.',
-                url: 'https://fonts.googleapis.com/icon?family=Material+Icons'
-            },
-            {
-                name: 'Lucide Icons (JS Library)',
-                description: 'A beautiful, customizable icon library. Place this script just before the closing &lt;/body&gt; tag. You\'ll need separate JS to call `lucide.createIcons()` after the DOM loads.',
-                url: 'https://unpkg.com/lucide@0.370.0/dist/umd/lucide.js'
-            },
-
-            // --- Animation & Motion Libraries ---
-            {
-                name: 'AOS (Animate On Scroll) CSS 2.3.1',
-                description: 'CSS styles for the Animate On Scroll library. Place this in the &lt;head&gt; section of your HTML document.',
-                url: 'https://unpkg.com/aos@2.3.1/dist/aos.css'
-            },
-            {
-                name: 'AOS (Animate On Scroll) JS 2.3.1',
-                description: 'JavaScript for AOS. Place this script just before the closing &lt;/body&gt; tag. After this, you\'ll need a separate &lt;script&gt; block with `AOS.init();` to activate animations.',
-                url: 'https://unpkg.com/aos@2.3.1/dist/aos.js'
-            },
-            {
-                name: 'GSAP (GreenSock Animation Platform) Core JS 3.12.5',
-                description: 'The core engine for professional-grade JavaScript animations. Place this script just before the closing &lt;/body&gt; tag.',
-                url: 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js'
-            }
-        ];
-
-        const openCdnButton = document.getElementById('open-cdn-btn');
-        const cdnLibraryPanel = document.getElementById('cdn-library-panel');
-        const closeCdnButton = document.getElementById('close-cdn-btn');
-        const cdnListContainer = document.getElementById('cdn-list');
-        const messageBox = document.getElementById('message-box');
-        const overlay = document.getElementById('overlay');
-
-        /**
-         * Displays a temporary message box for user feedback.
-         * @param {string} message The message to display.
-         * @param {string} type 'success' or 'error' (for potential future styling).
-         */
-        function showMessageBox(message, type = 'success') {
-            messageBox.textContent = message;
-            messageBox.classList.add('show');
-
-            if (type === 'success') {
-                messageBox.style.backgroundColor = '#4CAF50';
-            } else if (type === 'error') {
-                messageBox.style.backgroundColor = '#f44336';
-            } else {
-                messageBox.style.backgroundColor = '#333';
-            }
-
-            setTimeout(() => {
-                messageBox.classList.remove('show');
-            }, 2000);
-        }
-
-        /**
-         * Copies the given text (URL) to the clipboard.
-         * Uses navigator.clipboard.writeText if available, falls back to document.execCommand.
-         * @param {string} textToCopy The text (URL in this case) to copy.
-         */
-        function copyUrlToClipboard(textToCopy) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(textToCopy)
-                    .then(() => {
-                        showMessageBox('URL Copied!', 'success');
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy via clipboard API:', err);
-                        fallbackCopyTextToClipboard(textToCopy);
-                    });
-            } else {
-                fallbackCopyTextToClipboard(textToCopy);
-            }
-        }
-
-        /**
-         * Fallback function to copy text using document.execCommand.
-         * @param {string} textToCopy The text to copy.
-         */
-        function fallbackCopyTextToClipboard(textToCopy) {
-            const tempTextarea = document.createElement('textarea');
-            tempTextarea.value = textToCopy;
-            tempTextarea.style.position = 'fixed'; // Hide from view
-            tempTextarea.style.left = '-9999px';
-            document.body.appendChild(tempTextarea);
-            tempTextarea.focus();
-            tempTextarea.select();
-
-            try {
-                const successful = document.execCommand('copy');
-                if (successful) {
-                    showMessageBox('URL Copied! (Fallback)', 'success');
-                } else {
-                    showMessageBox('Copy Failed! Please copy manually.', 'error');
-                }
-            } catch (err) {
-                console.error('Fallback copy failed:', err);
-                showMessageBox('Copy Failed! Please copy manually. (Error)', 'error');
-            } finally {
-                document.body.removeChild(tempTextarea);
-            }
-        }
-
-        // Function to populate the CDN list panel with clickable links
-        function populateCdnList() {
-            cdnListContainer.innerHTML = ''; // Clear previous content
-            safeCDNList.forEach((cdn) => {
-                const cdnItem = document.createElement('li');
-                cdnItem.classList.add('cdn-item', 'mb-6', 'last:mb-0'); // Add styling classes
-
-                cdnItem.innerHTML = `
-                    <h3 class="text-xl font-semibold mb-2">${cdn.name}</h3>
-                    <p class="text-sm mb-4">${cdn.description}</p>
-                    <a href="#" data-cdn-url="${cdn.url}" class="cdn-link px-5 py-2 rounded-md font-medium shadow-lg">
-                        Copy URL
-                    </a>
-                `;
-
-                // Attach event listener to the link
-                const cdnLink = cdnItem.querySelector('.cdn-link');
-                cdnLink.addEventListener('click', (event) => {
-                    event.preventDefault(); // Stop the link from navigating
-                    const urlToCopy = cdnLink.dataset.cdnUrl; // Get URL from data attribute
-                    copyUrlToClipboard(urlToCopy);
-                });
-
-                cdnListContainer.appendChild(cdnItem);
-            });
-        }
-
-        // --- Event Listeners for Open/Close Buttons ---
-        openCdnButton.addEventListener('click', () => {
-            cdnLibraryPanel.classList.add('visible');
-            overlay.classList.add('visible');
-        });
-
-        closeCdnButton.addEventListener('click', () => {
-            cdnLibraryPanel.classList.remove('visible');
-            overlay.classList.remove('visible');
-        });
-
-        // Close when clicking outside the panel (on the overlay)
-        overlay.addEventListener('click', () => {
-            cdnLibraryPanel.classList.remove('visible');
-            overlay.classList.remove('visible');
-        });
-
-        // Initialize the CDN list when the page loads
-        document.addEventListener('DOMContentLoaded', populateCdnList);
-    
+    // Initialize the CDN list when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', populateCdnList);
 </script>
 
 
 
-</body>
 
-</html>   
+
+
+</body></html>
