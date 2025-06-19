@@ -1452,76 +1452,51 @@
     {
         name: 'Bootstrap 5.3.3 CSS CDN',
         description: 'Bootstrap\'s compiled and minified CSS for responsive design. Place this in the <head> section of your HTML document.',
-        insert: `<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH' crossorigin='anonymous'>`
+        insert: "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH' crossorigin='anonymous'>"
     },
     {
         name: 'Bootstrap 5.3.3 JS Bundle CDN (with Popper.js)',
         description: 'Bootstrap\'s JavaScript components including Popper.js (for tooltips, popovers, etc.). Place this just before the closing </body> tag in your HTML for optimal performance and to ensure the DOM is ready.',
-        insert: `<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js' integrity='sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDjOxhy9GkcIdslK1eN7N6jIeHz' crossorigin='anonymous'></script>`
+        insert: "<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js' integrity='sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDjOxhy9GkcIdslK1eN7N6jIeHz' crossorigin='anonymous'></script>"
     },
     {
         name: 'Tailwind CSS CDN (JIT mode)',
-        description: 'A utility-first CSS framework. This script dynamically compiles Tailwind classes. Place it at the end of your <head> or at the beginning of your <body> for development.',
-        insert: `<script src='https://cdn.tailwindcss.com'></script>`
+        description: 'A utility-first CSS framework. This script dynamically compiles Tailwind classes. Place it at the end of your head tag or at the beginning of your <body> for development.',
+        insert: "<script src='https://cdn.tailwindcss.com'></script>"
     },
 
     // --- Icon Libraries ---
     {
         name: 'Font Awesome Free 6.5.2 (CSS)',
         description: 'The most popular icon library for web fonts and SVG icons. Place this in the <head> section of your HTML document.',
-        insert: `<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css' integrity='sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==' crossorigin='anonymous' referrerpolicy='no-referrer' />`
+        insert: "<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css' integrity='sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==' crossorigin='anonymous' referrerpolicy='no-referrer' />"
     },
     {
         name: 'Bootstrap Icons 1.11.3 (CSS)',
         description: 'Official SVG icon library for Bootstrap projects. Place this in the <head> section of your HTML document.',
-        insert: `<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'>`
+        insert: "<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css'>"
     },
     {
         name: 'Material Icons (Google Fonts)',
         description: 'Google\'s widely used open-source icon set. Place this in the <head> section of your HTML document.',
-        insert: `<link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>`
+        insert: "<link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>"
     },
     {
         name: 'Lucide Icons (JS Library)',
         description: 'A beautiful, customizable icon library. Place this script just before the closing </body> tag. You\'ll need separate JS to call `lucide.createIcons()` after the DOM loads.',
-        insert: `<script src='https://unpkg.com/lucide@0.370.0/dist/umd/lucide.js' crossorigin='anonymous'></script>`
+        insert: "<script src='https://unpkg.com/lucide@0.370.0/dist/umd/lucide.js' crossorigin='anonymous'></script>"
     },
 
     // --- Animation & Motion Libraries ---
     {
         name: 'AOS (Animate On Scroll) CSS 2.3.1',
         description: 'CSS styles for the Animate On Scroll library. Place this in the <head> section of your HTML document.',
-        insert: `<link href='https://unpkg.com/aos@2.3.1/dist/aos.css' rel='stylesheet'>`
+        insert: "<link href='https://unpkg.com/aos@2.3.1/dist/aos.css' rel='stylesheet'>"
     },
     {
         name: 'AOS (Animate On Scroll) JS 2.3.1',
         description: 'JavaScript for AOS. Place this script just before the closing </body> tag. After this, you\'ll need a separate <script> block with `AOS.init();` to activate animations.',
-        insert: `<script src='https://unpkg.com/aos@2.3.1/dist/aos.js' crossorigin='anonymous'></script>`
-    },
-    {
-        name: 'GSAP (GreenSock Animation Platform) Core JS 3.12.5',
-        description: 'The core engine for professional-grade JavaScript animations. Place this script just before the closing </body> tag.',
-        insert: `<script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js' integrity='sha512-7rxBNzfF2Q1lC4z7cK7z0L3H6w2b5G2v0C3V4+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+V5+w5+Tps://catfact.ninja/fact"
-    },
-    {
-        name: "Quote Garden API (Random Quotes)",
-        description: "Fetches a random quote with author. This is an API endpoint, not a CDN for a library.",
-        insert: "https://quote-garden.herokuapp.com/api/v3/quotes/random"
-    },
-    {
-        name: "Numbers API (Random Facts)",
-        description: "Fetches interesting facts about numbers (trivia, math, dates, year). This is an API endpoint, not a CDN for a library.",
-        insert: "http://numbersapi.com/random/trivia" // Can be /math, /date, /year
-    },
-    {
-        name: "Dog API (Random Dog Images)",
-        description: "Fetches a random image of a dog. This is an API endpoint, not a CDN for a library.",
-        insert: "https://dog.ceo/api/breeds/image/random"
-    },
-    {
-        name: "Random User Generator API (User Data)",
-        description: "Generates random user data (name, email, address, etc.). This is an API endpoint, not a CDN for a library.",
-        insert: "https://randomuser.me/api/"
+        insert: "<script src='https://unpkg.com/aos@2.3.1/dist/aos.js' crossorigin='anonymous'></script>"
     }
 
 ];
