@@ -114,7 +114,7 @@
             min-width: 0;
         }
 
-        .suggestions {
+        .suggestions,.suggestionsDiv{
             position: absolute;
             background: #fff;
             border: 1px solid #ccc;
@@ -1030,7 +1030,7 @@
 
  //draggable div js code-------------
         document.addEventListener('DOMContentLoaded', () => {
-            const draggableElement = document.getElementById('suggestionsDiv');
+            const draggableElement = document.getElementById('suggestions');
             if (!draggableElement) return;
 
             let isDragging = false;
