@@ -128,7 +128,7 @@
         }
 
         .suggestions div {
-            padding: 12px 12px;
+            padding: 8px 12px;
             cursor: pointer;
             font-size: 14px;
         }
@@ -1018,119 +1018,7 @@
 
     <script>
 
- //draggable div js code-------------
-        document.addEventListener('DOMContentLoaded', () => {
-            const draggableElement = document.getElementById('suggestions');
-            if (!draggableElement) return;
 
-            let isDragging = false;
-            let initialX;
-            let initialY;
-            let xOffset = 0;
-            let yOffset = 0;
-
-            // --- Utility Functions ---
-
-            // Sets the position of the element
-            function setPosition(x, y) {
-                draggableElement.style.left = `${x}px`;
-                draggableElement.style.top = `${y}px`;
-            }
-
-            // Handles the start of a drag (mouse down or touch start)
-            function dragStart(clientX, clientY) {
-                // Get the current computed style position
-                const rect = draggableElement.getBoundingClientRect();
-
-                // Calculate the offset (where the user grabbed the box relative to its top-left corner)
-                xOffset = clientX - rect.left;
-                yOffset = clientY - rect.top;
-
-                isDragging = true;
-                draggableElement.classList.add('is-dragging');
-            }
-
-            // Handles the movement during drag
-            function drag(clientX, clientY) {
-                if (isDragging) {
-                    const newX = clientX - xOffset;
-                    const newY = clientY - yOffset;
-                    setPosition(newX, newY);
-                }
-            }
-
-            // Handles the end of a drag
-            function dragEnd() {
-                isDragging = false;
-                draggableElement.classList.remove('is-dragging');
-            }
-
-
-            // --- Mouse Event Handlers ---
-
-            draggableElement.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                dragStart(e.clientX, e.clientY);
-                document.addEventListener('mousemove', mouseMove);
-                document.addEventListener('mouseup', mouseUp);
-            });
-
-            function mouseMove(e) {
-                e.preventDefault();
-                drag(e.clientX, e.clientY);
-            }
-
-            function mouseUp() {
-                dragEnd();
-                document.removeEventListener('mousemove', mouseMove);
-                document.removeEventListener('mouseup', mouseUp);
-            }
-
-
-            // --- Touch Event Handlers (for Mobile) ---
-
-            draggableElement.addEventListener('touchstart', (e) => {
-                // Only track the first touch point
-                const touch = e.changedTouches[0];
-                dragStart(touch.clientX, touch.clientY);
-            }, { passive: true }); // Use passive true as we don't preventDefault here
-
-            draggableElement.addEventListener('touchmove', (e) => {
-                if (!isDragging) return;
-
-                // Stop the browser from scrolling/zooming while dragging the element
-                e.preventDefault(); 
-
-                const touch = e.changedTouches[0];
-                drag(touch.clientX, touch.clientY);
-            }, { passive: false }); // Must be passive false to allow preventDefault
-
-            draggableElement.addEventListener('touchend', dragEnd);
-
-            // --- Initial Positioning Adjustment ---
-            // Fix initial position set with Tailwind translate to absolute pixel values
-            // so drag logic works consistently.
-            const initialRect = draggableElement.getBoundingClientRect();
-            setPosition(initialRect.left, initialRect.top);
-            
-            // Remove the initial transform classes after setting absolute position
-            draggableElement.classList.remove('top-1/4', 'left-1/2', '-translate-x-1/2');
-        });
-    
-
-//draggable div code ends------------
-
-
-
-
-
-
-
-
-
-
-
-        
 // Get references to the elements
         const txt = document.getElementById('txt');
         const lineNumbers = document.getElementById('line-numbers');
