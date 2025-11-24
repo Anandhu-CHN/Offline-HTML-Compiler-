@@ -2280,7 +2280,7 @@
     const cssInputArea = document.getElementById('functionDefinitionTextarea') || document.querySelector('textarea');
 
     if (cssInputArea) {
-        const cssSuggestions = [
+        let cssSuggestions = [
             // Flexbox and Display
             "display: flex;", "display: inline-flex;", "display: block;", "display: inline;", "display: grid;",
             "flex-direction: row;", "flex-direction: column;", "flex-wrap: wrap;", "justify-content: center;",
@@ -2356,11 +2356,11 @@
             "white-space: nowrap;", "word-wrap: break-word;", "resize: both;", "outline-color: blue;",
         
 
-    // Newer Flexbox and Grid Extensions
-    "align-self: flex-start;", "justify-self: center;", "place-content: center space-around;", "place-items: center;",
-    "place-self: stretch;", "grid-template-areas: 'a b' 'c d';", "grid-auto-flow: row dense;", "grid-auto-columns: minmax(100px, auto);",
-    "grid-auto-rows: min-content;", "grid-template: 'header' auto 'main' 1fr 'footer' auto / 1fr;", "aspect-ratio: 16 / 9;",
-    "row-gap: 20px;", "column-gap: 20px;",
+             // Newer Flexbox and Grid Extensions
+             "align-self: flex-start;", "justify-self: center;", "place-content: center space-around;", "place-items: center;",
+             "place-self: stretch;", "grid-template-areas: 'a b' 'c d';", "grid-auto-flow: row dense;", "grid-auto-columns: minmax(100px, auto);",
+             "grid-auto-rows: min-content;", "grid-template: 'header' auto 'main' 1fr 'footer' auto / 1fr;", "aspect-ratio: 16 / 9;",
+             "row-gap: 20px;", "column-gap: 20px;",
 
     // Color, Background, and Effects
     "color: var(--primary-color);", "background-image: linear-gradient(to right, red, yellow);", "background-clip: text;",
@@ -2515,6 +2515,16 @@
     "font-size: clamp(1rem, 5vw, 2rem);", // Clamping value between a min and max
     "width: calc(100% - 20px);" // Calculation function
 ];
+
+//New function to replace hyphenated css properties to camelcase.
+function toCamelCase(s) {
+    // Finds a hyphen followed by a lowercase letter, and replaces it
+    // with the uppercase version of that letter.
+    return s.replace(/-([a-z])/g, (match, char) => char.toUpperCase());
+}
+
+toCamelcase(cssSuggessions);
+        
         cssInputArea.addEventListener('input', (event) => {
             const currentInput = event.target.value;
             // Get the last "word" or partial property being typed
