@@ -2,203 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Diya AI Tutor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --g-blue: #4285f4; --g-red: #ea4335; --g-yellow: #fbbc05; --g-green: #34a853; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }
-        #bg-canvas { position: absolute; top: 0; left: 0; z-index: 1; filter: blur(80px); opacity: 0.6; }
-
-        /* Navigation & Panels */
-        .top-nav { position: absolute; top: 20px; right: 20px; z-index: 100; }
-        .nav-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(20px); }
-        .panel { position: absolute; top: 80px; right: 20px; z-index: 101; background: rgba(15, 15, 15, 0.9); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 20px; width: 280px; display: none; color: white; max-height: 60vh; overflow-y: auto; }
-
-        /* History Items */
-        .history-item { background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--g-blue); font-size: 13px; }
-
-        /* Main UI */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: sans-serif; }
+        #bg-canvas { position: absolute; top: 0; left: 0; z-index: 1; filter: blur(80px); opacity: 0.5; }
+        
         .main-shell { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
-        .chat-bubble { width: 100%; max-width: 450px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(40px); border-radius: 32px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px; margin-bottom: 30px; }
-        #status-indicator { display: flex; align-items: center; gap: 8px; font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; }
-        #status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--g-blue); }
-        #transcript { color: #fff; font-size: 18px; margin-top: 15px; min-height: 40px; font-weight: 300; }
+        .chat-bubble { width: 100%; max-width: 400px; background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(30px); border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 25px; margin-bottom: 40px; }
+        #status-text { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        #transcript { color: #fff; font-size: 18px; margin-top: 15px; min-height: 50px; line-height: 1.4; }
 
-        .mic-btn { width: 80px; height: 80px; border-radius: 50%; background: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.4s; }
-        .pulse { background: var(--g-red) !important; transform: scale(1.1); box-shadow: 0 0 30px rgba(234, 67, 53, 0.5); }
+        .mic-btn { width: 70px; height: 70px; border-radius: 50%; background: #fff; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
+        .pulse { background: var(--g-red) !important; transform: scale(1.1); box-shadow: 0 0 30px rgba(234, 67, 53, 0.4); }
 
-        /* Login */
-        .login-overlay { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        input { background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; width: 280px; margin-bottom: 15px; text-align: center; font-size: 16px; }
-        .start-btn { background: #fff; color: #000; border: none; padding: 15px 40px; border-radius: 30px; font-weight: 700; cursor: pointer; }
+        .login { position: fixed; inset: 0; z-index: 100; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        input { background: #111; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 12px; width: 260px; margin-bottom: 15px; text-align: center; }
+        .btn { background: #fff; padding: 15px 40px; border-radius: 30px; font-weight: bold; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
 
-<div class="top-nav">
-    <div class="nav-btn" onclick="togglePanel()">
-        <svg viewBox="0 0 24 24" width="24" fill="white"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
-    </div>
-</div>
-
-<div id="history-panel" class="panel">
-    <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <span style="font-size:11px; font-weight:700;">HISTORY</span>
-        <span onclick="clearHistory()" style="color:var(--g-red); font-size:10px; cursor:pointer;">CLEAR</span>
-    </div>
-    <div id="history-list"></div>
-</div>
-
-<div id="login" class="login-overlay">
-    <h2 style="color:#fff; letter-spacing:2px;">DIYA <span style="color:var(--g-blue)">TUTOR</span></h2>
-    <input type="text" id="spaceUrl" placeholder="Paste HF Space URL">
-    <p style="color:#555; font-size:11px; margin-bottom:20px;">Example: https://name-diya.hf.space</p>
-    <button class="start-btn" onclick="initApp()">OPEN LESSON</button>
+<div id="login-screen" class="login">
+    <h2 style="color:#fff">DIYA <span style="color:var(--g-blue)">TUTOR</span></h2>
+    <input type="text" id="space-input" placeholder="Paste Space URL (no /chat)">
+    <button class="btn" onclick="startApp()">START</button>
 </div>
 
 <div class="main-shell">
     <div class="chat-bubble">
-        <div id="status-indicator"><div id="status-dot"></div><span id="status-text">Ready</span></div>
-        <div id="transcript">Tap the mic to start...</div>
+        <div id="status-text">Ready</div>
+        <div id="transcript">Tap mic to speak...</div>
     </div>
-    <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-        <svg viewBox="0 0 24 24" width="32"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+    <button class="mic-btn" id="mic-btn" onclick="toggleMic()">
+        <svg viewBox="0 0 24 24" width="30"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
     </button>
 </div>
 
 <script>
-    let BACKEND_URL, scene, camera, renderer, recognition;
-    const synth = window.speechSynthesis;
-    let isListening = false, isSpeaking = false, blobs = [];
-    let historyData = JSON.parse(localStorage.getItem('diya_history') || '[]');
+    let API_URL, recognition, synth = window.speechSynthesis;
+    let isSpeaking = false, blobs = [];
 
-    function initBackground() {
-        scene = new THREE.Scene();
-        camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        const colors = [0x4285f4, 0xea4335, 0xfbbc05, 0x34a853];
-        colors.forEach(col => {
-            const mesh = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), new THREE.MeshBasicMaterial({ color: col }));
-            mesh.position.set((Math.random()-0.5)*12, (Math.random()-0.5)*12, -10);
-            scene.add(mesh);
-            blobs.push({ mesh, offset: Math.random() * 10, speed: 0.002 + Math.random()*0.003 });
+    // --- Background Animation ---
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('bg-canvas'), alpha: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const colors = [0x4285f4, 0xea4335, 0xfbbc05, 0x34a853];
+    colors.forEach(c => {
+        const m = new THREE.Mesh(new THREE.SphereGeometry(3, 32, 32), new THREE.MeshBasicMaterial({color: c}));
+        m.position.set((Math.random()-0.5)*12, (Math.random()-0.5)*12, -10);
+        scene.add(m);
+        blobs.push(m);
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        blobs.forEach((b, i) => {
+            b.position.y += Math.sin(Date.now()*0.001 + i)*0.005;
+            b.scale.setScalar(1 + Math.sin(Date.now()*0.002 + i)*0.1);
         });
-        function animate(t) {
-            requestAnimationFrame(animate);
-            let p = (isListening || isSpeaking) ? Math.sin(t*0.01)*0.2 + 1.2 : 1.0;
-            blobs.forEach((b, i) => {
-                b.mesh.scale.setScalar(p + Math.sin(t * b.speed + b.offset) * 0.1);
-                b.mesh.position.y += Math.cos(t * 0.001 + i) * 0.005;
-            });
-            renderer.render(scene, camera);
-        }
-        animate(0);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // --- App Logic ---
+    function startApp() {
+        let rawUrl = document.getElementById('space-input').value.trim();
+        if(!rawUrl) return alert("Please enter Space URL");
+        
+        // Auto-fix URL formatting
+        if(rawUrl.endsWith('/')) rawUrl = rawUrl.slice(0, -1);
+        API_URL = rawUrl.endsWith('/chat') ? rawUrl : rawUrl + '/chat';
+        
+        document.getElementById('login-screen').style.display = 'none';
+        initMic();
+        speak("Diya is ready.");
     }
 
     function initMic() {
         const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!Speech) return alert("Speech not supported on this device/browser.");
         recognition = new Speech();
+        recognition.onstart = () => { 
+            document.getElementById('mic-btn').classList.add('pulse');
+            document.getElementById('status-text').innerText = "Listening...";
+        };
+        recognition.onend = () => { 
+            document.getElementById('mic-btn').classList.remove('pulse');
+            document.getElementById('status-text').innerText = "Processing...";
+        };
         recognition.onresult = (e) => {
             const text = e.results[0][0].transcript;
             document.getElementById('transcript').innerText = text;
-            askAI(text);
+            callAI(text);
         };
-        recognition.onstart = () => { isListening = true; updateStatus("Listening", "var(--g-red)"); document.getElementById('micBtn').classList.add('pulse'); };
-        recognition.onend = () => { isListening = false; document.getElementById('micBtn').classList.remove('pulse'); if(!isSpeaking) updateStatus("Ready", "var(--g-blue)"); };
     }
 
-    async function askAI(text) {
-        updateStatus("Thinking", "var(--g-yellow)");
-        
-        // IMPORTANT: Ensure the URL ends with /chat as defined in app.py
-        const endpoint = BACKEND_URL.endsWith('/') ? BACKEND_URL + 'chat' : BACKEND_URL + '/chat';
-
+    async function callAI(text) {
         try {
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    inputs: `<|begin_of_text|><|start_header_id|>system<|end_header_id|>\nYou are Diya, an English tutor. Correct grammar then answer in 1 sentence.<|eot_id|><|start_header_id|>user<|end_header_id|>\n${text}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n`
-                })
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({inputs: text})
             });
-
             const data = await res.json();
             
-            if (data.error && data.error.includes("loading")) {
-                document.getElementById('transcript').innerText = "Waking up AI...";
-                setTimeout(() => askAI(text), 8000);
-                return;
-            }
-
             let reply = Array.isArray(data) ? data[0].generated_text : data.generated_text;
-            reply = reply.replace(/<\|.*?\|>/g, "").trim();
-            
-            saveToHistory(text, reply);
-            speak(reply);
+            if(!reply && data.error) reply = "Error: " + data.error;
 
-        } catch (e) {
-            updateStatus("Error", "var(--g-red)");
-            document.getElementById('transcript').innerText = "Check Space Link.";
+            speak(reply || "I couldn't hear you clearly.");
+        } catch(e) {
+            document.getElementById('status-text').innerText = "Connection Error";
         }
     }
 
-    function saveToHistory(u, a) {
-        historyData.unshift({ u, a });
-        if(historyData.length > 15) historyData.pop();
-        localStorage.setItem('diya_history', JSON.stringify(historyData));
-        renderHistory();
-    }
-
-    function renderHistory() {
-        document.getElementById('history-list').innerHTML = historyData.map(h => `
-            <div class="history-item">
-                <div style="color:var(--g-blue); font-weight:700; font-size:10px;">YOU</div>
-                <div>${h.u}</div>
-                <div style="color:var(--g-green); font-weight:700; font-size:10px; margin-top:5px;">DIYA</div>
-                <div>${h.a}</div>
-            </div>
-        `).join('');
-    }
-
     function speak(text) {
-        isSpeaking = true;
-        updateStatus("Speaking", "var(--g-green)");
+        if(synth.speaking) synth.cancel();
         const msg = new SpeechSynthesisUtterance(text);
-        msg.onend = () => { isSpeaking = false; updateStatus("Ready", "var(--g-blue)"); };
-        document.getElementById('transcript').innerText = text;
+        msg.onstart = () => { 
+            document.getElementById('status-text').innerText = "Speaking...";
+            document.getElementById('transcript').innerText = text;
+        };
+        msg.onend = () => document.getElementById('status-text').innerText = "Ready";
         synth.speak(msg);
     }
 
     function toggleMic() {
-        if(isSpeaking) synth.cancel();
+        if(synth.speaking) synth.cancel();
         try { recognition.start(); } catch(e) { recognition.stop(); }
-    }
-
-    function updateStatus(t, c) {
-        document.getElementById('status-text').innerText = t;
-        document.getElementById('status-dot').style.backgroundColor = c;
-    }
-
-    function togglePanel() {
-        const p = document.getElementById('history-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function clearHistory() { historyData=[]; localStorage.removeItem('diya_history'); renderHistory(); }
-
-    function initApp() {
-        BACKEND_URL = document.getElementById('spaceUrl').value;
-        if(!BACKEND_URL) return alert("Enter your Space URL.");
-        document.getElementById('login').style.display = 'none';
-        initBackground();
-        initMic();
-        renderHistory();
-        speak("System Online.");
     }
 </script>
 </body>
